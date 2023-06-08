@@ -189,7 +189,6 @@ func chatToAttributedString(
             let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
               .appending(path: "chat-gpt-tmp-code.\(match.1)")
             let html = try await codeToHtml(code: String(match.output.2), url: url)
-            try FileManager.default.removeItem(at: url)
             let attributedString = try NSMutableAttributedString(
               data: html.data(using: .utf8)!, 
               options: [
@@ -277,6 +276,7 @@ func codeToHtml(code: String, url: URL) async throws -> String {
       "/" + url.pathComponents.dropFirst().joined(separator: "/")
     ]
   )
+  try FileManager.default.removeItem(at: url)
   lock.withLock {
     syntaxHighlightingCache[code] = html
   }

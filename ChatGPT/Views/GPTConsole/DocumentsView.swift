@@ -67,6 +67,14 @@ struct DocumentsView: View {
             hoveringDocumentID = over ? document.id : nil
           }
         }
+        .onDelete { indexSet in
+          for index in indexSet {
+            try? viewModel.documentsStorage.delete(documentID: viewModel.documents[index].id)
+          }
+          viewModel.loadDocuments()
+          viewModel.activePostID = nil
+          didSelectDocument(nil)
+        }
       }
     }
     .background(Color.palette.background1)

@@ -114,7 +114,6 @@ extension GPTConsoleCell {
     @Published var viewingText: AttributedString
     @Published var text: AttributedString
     
-    @MainActor
     init(message: Message, modifier: @escaping (AttributedString) -> Void) {
       self.message = message
       var container = AttributeContainer()
@@ -123,7 +122,7 @@ extension GPTConsoleCell {
       self.text = AttributedString(message.message.content, attributes: container)
       self.viewingText = .init()
       self.modifier = modifier
-      Task {
+      Task { @MainActor in
         self.viewingText = await messageToAttributedString(message.message)
       }
     }
@@ -145,3 +144,4 @@ extension GPTConsoleCell {
   }
 }
 
+extension AttributedString: @unchecked Sendable {}

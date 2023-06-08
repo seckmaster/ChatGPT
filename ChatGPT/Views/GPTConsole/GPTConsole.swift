@@ -36,6 +36,12 @@ struct GPTConsole: View {
               viewModel.updateMessages()
             }
           }
+          .onDelete { indexSet in
+            DispatchQueue.main.async {
+              viewModel.history.remove(atOffsets: indexSet)
+              viewModel.updateMessages()
+            }
+          }
         }
         input(height: metrics.size.height * 0.3 - 40)
       }

@@ -59,8 +59,8 @@ struct DocumentsStorage {
     try data.write(to: url.appending(path: document.id))
   }
   
-  func delete(document: Document) throws {
-    try FileManager.default.removeItem(at: url.appending(path: document.id))
+  func delete(documentID id: Document.ID) throws {
+    try FileManager.default.removeItem(at: url.appending(path: id))
   }
   
   private var url: URL {
