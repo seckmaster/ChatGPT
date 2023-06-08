@@ -11,6 +11,16 @@
 		EAF94D172A31A87100A1B98A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D162A31A87100A1B98A /* ContentView.swift */; };
 		EAF94D192A31A87200A1B98A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EAF94D182A31A87200A1B98A /* Assets.xcassets */; };
 		EAF94D1C2A31A87200A1B98A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EAF94D1B2A31A87200A1B98A /* Preview Assets.xcassets */; };
+		EAF94D252A31A8D100A1B98A /* Swiftchain in Frameworks */ = {isa = PBXBuildFile; productRef = EAF94D242A31A8D100A1B98A /* Swiftchain */; };
+		EAF94D272A31A8D100A1B98A /* SwiftchainOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = EAF94D262A31A8D100A1B98A /* SwiftchainOpenAI */; };
+		EAF94D2A2A31A92C00A1B98A /* ConfigStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D292A31A92C00A1B98A /* ConfigStorage.swift */; };
+		EAF94D2D2A31A98F00A1B98A /* GPTConsole.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D2C2A31A98F00A1B98A /* GPTConsole.swift */; };
+		EAF94D2F2A31A9A800A1B98A /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D2E2A31A9A800A1B98A /* TextView.swift */; };
+		EAF94D322A31A9CA00A1B98A /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D312A31A9CA00A1B98A /* Utils.swift */; };
+		EAF94D342A31ABBF00A1B98A /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D332A31ABBF00A1B98A /* Color.swift */; };
+		EAF94D362A31ABFB00A1B98A /* LoadingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D352A31ABFB00A1B98A /* LoadingButton.swift */; };
+		EAF94D382A31AE8200A1B98A /* ApiKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D372A31AE8200A1B98A /* ApiKeyView.swift */; };
+		EAF94D3B2A31B1EA00A1B98A /* GPTConsoleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D3A2A31B1EA00A1B98A /* GPTConsoleCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +30,14 @@
 		EAF94D182A31A87200A1B98A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EAF94D1B2A31A87200A1B98A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		EAF94D1D2A31A87200A1B98A /* ChatGPT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ChatGPT.entitlements; sourceTree = "<group>"; };
+		EAF94D292A31A92C00A1B98A /* ConfigStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigStorage.swift; sourceTree = "<group>"; };
+		EAF94D2C2A31A98F00A1B98A /* GPTConsole.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPTConsole.swift; sourceTree = "<group>"; };
+		EAF94D2E2A31A9A800A1B98A /* TextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		EAF94D312A31A9CA00A1B98A /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		EAF94D332A31ABBF00A1B98A /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		EAF94D352A31ABFB00A1B98A /* LoadingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButton.swift; sourceTree = "<group>"; };
+		EAF94D372A31AE8200A1B98A /* ApiKeyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiKeyView.swift; sourceTree = "<group>"; };
+		EAF94D3A2A31B1EA00A1B98A /* GPTConsoleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPTConsoleCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +45,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EAF94D272A31A8D100A1B98A /* SwiftchainOpenAI in Frameworks */,
+				EAF94D252A31A8D100A1B98A /* Swiftchain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,8 +72,10 @@
 		EAF94D132A31A87100A1B98A /* ChatGPT */ = {
 			isa = PBXGroup;
 			children = (
+				EAF94D302A31A9C100A1B98A /* Utils */,
+				EAF94D2B2A31A98100A1B98A /* Views */,
+				EAF94D282A31A92000A1B98A /* Storage */,
 				EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */,
-				EAF94D162A31A87100A1B98A /* ContentView.swift */,
 				EAF94D182A31A87200A1B98A /* Assets.xcassets */,
 				EAF94D1D2A31A87200A1B98A /* ChatGPT.entitlements */,
 				EAF94D1A2A31A87200A1B98A /* Preview Content */,
@@ -67,6 +89,44 @@
 				EAF94D1B2A31A87200A1B98A /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		EAF94D282A31A92000A1B98A /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				EAF94D292A31A92C00A1B98A /* ConfigStorage.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		EAF94D2B2A31A98100A1B98A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				EAF94D392A31B1DC00A1B98A /* GPTConsole */,
+				EAF94D372A31AE8200A1B98A /* ApiKeyView.swift */,
+				EAF94D162A31A87100A1B98A /* ContentView.swift */,
+				EAF94D352A31ABFB00A1B98A /* LoadingButton.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		EAF94D302A31A9C100A1B98A /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				EAF94D312A31A9CA00A1B98A /* Utils.swift */,
+				EAF94D332A31ABBF00A1B98A /* Color.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		EAF94D392A31B1DC00A1B98A /* GPTConsole */ = {
+			isa = PBXGroup;
+			children = (
+				EAF94D2E2A31A9A800A1B98A /* TextView.swift */,
+				EAF94D2C2A31A98F00A1B98A /* GPTConsole.swift */,
+				EAF94D3A2A31B1EA00A1B98A /* GPTConsoleCell.swift */,
+			);
+			path = GPTConsole;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -85,6 +145,10 @@
 			dependencies = (
 			);
 			name = ChatGPT;
+			packageProductDependencies = (
+				EAF94D242A31A8D100A1B98A /* Swiftchain */,
+				EAF94D262A31A8D100A1B98A /* SwiftchainOpenAI */,
+			);
 			productName = ChatGPT;
 			productReference = EAF94D112A31A87100A1B98A /* ChatGPT.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +177,9 @@
 				Base,
 			);
 			mainGroup = EAF94D082A31A87100A1B98A;
+			packageReferences = (
+				EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */,
+			);
 			productRefGroup = EAF94D122A31A87100A1B98A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -139,8 +206,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EAF94D362A31ABFB00A1B98A /* LoadingButton.swift in Sources */,
+				EAF94D382A31AE8200A1B98A /* ApiKeyView.swift in Sources */,
 				EAF94D172A31A87100A1B98A /* ContentView.swift in Sources */,
+				EAF94D2D2A31A98F00A1B98A /* GPTConsole.swift in Sources */,
+				EAF94D342A31ABBF00A1B98A /* Color.swift in Sources */,
+				EAF94D3B2A31B1EA00A1B98A /* GPTConsoleCell.swift in Sources */,
+				EAF94D2A2A31A92C00A1B98A /* ConfigStorage.swift in Sources */,
 				EAF94D152A31A87100A1B98A /* ChatGPTApp.swift in Sources */,
+				EAF94D2F2A31A9A800A1B98A /* TextView.swift in Sources */,
+				EAF94D322A31A9CA00A1B98A /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +411,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/seckmaster/Swiftchain";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EAF94D242A31A8D100A1B98A /* Swiftchain */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */;
+			productName = Swiftchain;
+		};
+		EAF94D262A31A8D100A1B98A /* SwiftchainOpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */;
+			productName = SwiftchainOpenAI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EAF94D092A31A87100A1B98A /* Project object */;
 }
