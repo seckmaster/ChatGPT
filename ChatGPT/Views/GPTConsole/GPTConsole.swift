@@ -67,33 +67,51 @@ struct GPTConsole: View {
             editingText = ""
           } label: {
             Image(systemName: "trash.slash.fill")
-              .frame(width: 40, height: 40)
+              .frame(width: 50, height: 50)
           }
-          .frame(minWidth: 80, minHeight: 80)
+          .background(Color.palette.background)
           .buttonStyle(.borderless)
           Spacer()
           
           LoadingButton(isLoading: $isLoading) { 
-            Task {
-              guard !editingText.isEmpty else { return }
-              isLoading = true
-              let content = editingText
-              editingText = ""
-              await viewModel.callGPT(content: content)
-              isLoading = false
-            }
+            callGPT()
           } label: { 
             Image(systemName: "paperplane.fill")
-              .frame(width: 40, height: 40)
+              .frame(width: 50, height: 50)
           }
-          .frame(minWidth: 80, minHeight: 80)
-          .buttonStyle(.plain)
+          .background(Color.palette.background)
+          .buttonStyle(.borderless)
         }
+        .padding()
       }
     }
     .frame(height: min(300, max(120, height)))
     .background(Color.palette.background2)
     .cornerRadius(12)
+    .onKeyDown { event in
+      let enterKeyCode: UInt16 = 36
+      let kKeyKode: UInt16 = 40
+      switch (event.keyCode, event.modifierFlags.contains(.command)) {
+      case (enterKeyCode, true):
+        callGPT()
+      case (kKeyKode, true):
+        editingText = ""
+      case _:
+        break
+      }
+    }
+  }
+  
+  @MainActor
+  func callGPT() {
+    Task {
+      guard !editingText.isEmpty else { return }
+      isLoading = true
+      let content = editingText
+      editingText = ""
+      await viewModel.callGPT(content: content)
+      isLoading = false
+    }
   }
 }
 
@@ -171,5 +189,55 @@ extension GPTConsole {
 struct GPTConsole_Previews: PreviewProvider {
   static var previews: some View {
     GPTConsole(viewModel: .init(apiKey: ""))
+  }
+}
+
+struct ObserveKeyEventsView: ViewRepresentable {
+  class ObserveKeyView: NSView {
+    let observer: (NSEvent) -> Void 
+    
+    init(observer: @escaping (NSEvent) -> Void) {
+      self.observer = observer
+      super.init(frame: .zero)
+      NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+        self.keyDown(with: event)
+        return event
+      }
+    }
+    
+    required init?(coder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func keyDown(with event: NSEvent) {
+      observer(event)
+    }
+  }
+  
+  let observer: (NSEvent) -> Void
+  
+  func makeNSView(context: Context) -> ObserveKeyView {
+    .init(observer: observer)
+  }
+  
+  func updateNSView(_ view: ObserveKeyView, context: Context) {
+  }
+}
+
+struct ObserveKeyEventsModifier: ViewModifier {
+  let observer: (NSEvent) -> Void
+  
+  func body(content: Content) -> some View {
+    content
+      .overlay { 
+        ObserveKeyEventsView(observer: observer)
+          .allowsHitTesting(false)
+      }
+  }
+}
+
+extension View {
+  func onKeyDown(observer: @escaping (NSEvent) -> Void) -> some View {
+    modifier(ObserveKeyEventsModifier(observer: observer))
   }
 }

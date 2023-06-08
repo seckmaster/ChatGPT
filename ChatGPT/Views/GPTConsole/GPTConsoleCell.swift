@@ -68,6 +68,7 @@ struct GPTConsoleCell: View {
               Image(systemName: "checkmark.rectangle.fill")
                 .frame(width: 40, height: 40)
             }
+            .background(Color.palette.background)
             .buttonStyle(.borderless)
           } else if isHovering {
             Button {
@@ -77,6 +78,10 @@ struct GPTConsoleCell: View {
                 .frame(width: 40, height: 40)
             }
             .buttonStyle(.borderless)
+            .background(Color.palette.background)
+            .onHover { over in
+              isHovering = isHovering || over
+            }
           }
           Spacer()
         }

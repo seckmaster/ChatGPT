@@ -19,6 +19,7 @@ struct LoadingButton<T: View>: View {
     } label: {
       if isLoading {
         ProgressView()
+          .controlSize(.small)
           .tint(.white)
           .padding()
       } else {
