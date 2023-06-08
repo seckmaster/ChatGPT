@@ -21,6 +21,8 @@
 		EAF94D362A31ABFB00A1B98A /* LoadingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D352A31ABFB00A1B98A /* LoadingButton.swift */; };
 		EAF94D382A31AE8200A1B98A /* ApiKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D372A31AE8200A1B98A /* ApiKeyView.swift */; };
 		EAF94D3B2A31B1EA00A1B98A /* GPTConsoleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D3A2A31B1EA00A1B98A /* GPTConsoleCell.swift */; };
+		EAF94D3D2A31CB4E00A1B98A /* DocumentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D3C2A31CB4E00A1B98A /* DocumentsView.swift */; };
+		EAF94D3F2A31CCDC00A1B98A /* DocumentsStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D3E2A31CCDC00A1B98A /* DocumentsStorage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		EAF94D352A31ABFB00A1B98A /* LoadingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingButton.swift; sourceTree = "<group>"; };
 		EAF94D372A31AE8200A1B98A /* ApiKeyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiKeyView.swift; sourceTree = "<group>"; };
 		EAF94D3A2A31B1EA00A1B98A /* GPTConsoleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPTConsoleCell.swift; sourceTree = "<group>"; };
+		EAF94D3C2A31CB4E00A1B98A /* DocumentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsView.swift; sourceTree = "<group>"; };
+		EAF94D3E2A31CCDC00A1B98A /* DocumentsStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentsStorage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				EAF94D292A31A92C00A1B98A /* ConfigStorage.swift */,
+				EAF94D3E2A31CCDC00A1B98A /* DocumentsStorage.swift */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -125,6 +130,7 @@
 				EAF94D2E2A31A9A800A1B98A /* TextView.swift */,
 				EAF94D2C2A31A98F00A1B98A /* GPTConsole.swift */,
 				EAF94D3A2A31B1EA00A1B98A /* GPTConsoleCell.swift */,
+				EAF94D3C2A31CB4E00A1B98A /* DocumentsView.swift */,
 			);
 			path = GPTConsole;
 			sourceTree = "<group>";
@@ -210,9 +216,11 @@
 				EAF94D382A31AE8200A1B98A /* ApiKeyView.swift in Sources */,
 				EAF94D172A31A87100A1B98A /* ContentView.swift in Sources */,
 				EAF94D2D2A31A98F00A1B98A /* GPTConsole.swift in Sources */,
+				EAF94D3D2A31CB4E00A1B98A /* DocumentsView.swift in Sources */,
 				EAF94D342A31ABBF00A1B98A /* Color.swift in Sources */,
 				EAF94D3B2A31B1EA00A1B98A /* GPTConsoleCell.swift in Sources */,
 				EAF94D2A2A31A92C00A1B98A /* ConfigStorage.swift in Sources */,
+				EAF94D3F2A31CCDC00A1B98A /* DocumentsStorage.swift in Sources */,
 				EAF94D152A31A87100A1B98A /* ChatGPTApp.swift in Sources */,
 				EAF94D2F2A31A9A800A1B98A /* TextView.swift in Sources */,
 				EAF94D322A31A9CA00A1B98A /* Utils.swift in Sources */,

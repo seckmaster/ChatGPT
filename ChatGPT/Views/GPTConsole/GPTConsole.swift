@@ -12,9 +12,14 @@ struct GPTConsole: View {
   @ObservedObject var viewModel: ViewModel
   @State var editingText: String = ""
   @State var isLoading: Bool = false
+  var didUpdateDocument: (ChatOpenAILLM.Messages) -> Void
   
-  init(viewModel: ViewModel) {
+  init(
+    viewModel: ViewModel,
+    didUpdateDocument: @escaping (ChatOpenAILLM.Messages) -> Void
+  ) {
     self.viewModel = viewModel
+    self.didUpdateDocument = didUpdateDocument
   }
   
   var body: some View {
@@ -24,7 +29,7 @@ struct GPTConsole: View {
           ForEach(viewModel.messages) { message in
             GPTConsoleCell(message: message) { modifiedText in
               viewModel.history[message.id] = .init(
-                role: message.message.role, 
+                role: message.message.role,
                 content: String(modifiedText.characters[...])
               )
             } didStopEditing: {
@@ -36,19 +41,6 @@ struct GPTConsole: View {
       }
       .padding(.all, 10)
       .background(Color.palette.background1)
-      .enterApiKey(
-        isVisible: $viewModel.mustEnterApiKey,
-        save: {
-          do {
-            try ConfigStorage().store(config: .init(
-              apiKey: $0
-            ))
-            viewModel.didEnterApiKey($0)
-          } catch {
-            print("Could not store api key!")
-          }
-        }
-      )
     }
   }
   
@@ -63,14 +55,14 @@ struct GPTConsole: View {
       HStack { 
         Spacer()
         VStack {
-          Button {
-            editingText = ""
-          } label: {
-            Image(systemName: "trash.slash.fill")
-              .frame(width: 50, height: 50)
-          }
-          .background(Color.palette.background)
-          .buttonStyle(.borderless)
+//          Button {
+//            editingText = ""
+//          } label: {
+//            Image(systemName: "trash.slash.fill")
+//              .frame(width: 50, height: 50)
+//          }
+//          .background(Color.palette.background)
+//          .buttonStyle(.borderless)
           Spacer()
           
           LoadingButton(isLoading: $isLoading) { 
@@ -104,12 +96,18 @@ struct GPTConsole: View {
   
   @MainActor
   func callGPT() {
+    guard !editingText.isEmpty else { return }
+    let editingText = editingText
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    viewModel.history.append(.init(role: .user, content: editingText))
+    viewModel.updateMessages()
+    didUpdateDocument(viewModel.history)
     Task {
-      guard !editingText.isEmpty else { return }
       isLoading = true
       let content = editingText
-      editingText = ""
+      self.editingText = ""
       await viewModel.callGPT(content: content)
+      didUpdateDocument(viewModel.history)
       isLoading = false
     }
   }
@@ -118,38 +116,43 @@ struct GPTConsole: View {
 extension GPTConsole {
   class ViewModel: ObservableObject {
     @Published var title: String?
-    @Published var mustEnterApiKey: Bool
-    @Published var messages: [GPTConsoleCell.Message]
-    var history: [ChatOpenAILLM.Message] = [
-      .init(
-        role: .system, 
-        content: "You are a helpful assistant. Respond to user's queries in an informative, professional and honest manner."
-      )
-    ]
-    
-    private var llm: ChatOpenAILLM?
-    
-    init() {
-      self.mustEnterApiKey = true
-      self.messages = [
-        .init(id: 0, message: history.last!)
-      ]
+    @Published var messages: [GPTConsoleCell.Message] = []
+    var history: ChatOpenAILLM.Messages
+    var apiKey: String? {
+      didSet {
+        llm = apiKey.map { .init(apiKey: $0) }
+      }
     }
     
-    init(apiKey: String) {
-      self.llm = .init(apiKey: apiKey)
-      self.mustEnterApiKey = false
-      self.messages = [
-        .init(id: 0, message: history.last!)
+    private var llm: ChatOpenAILLM!
+    
+    init() {
+      history = [
+        .init(
+          role: .system, 
+          content: defaultChatGPTPrompt
+        )
       ]
+      updateMessages()
+    }
+   
+    init(prompt: String) {
+      history = [
+        .init(
+          role: .system, 
+          content: prompt
+        )
+      ]
+      updateMessages()
+    } 
+    
+    init(history: ChatOpenAILLM.Messages) {
+      self.history = history
+      updateMessages()
     }
     
     @MainActor
     func callGPT(content: String) async {
-      guard let llm else { return }
-      
-      history.append(.init(role: .user, content: content))
-      updateMessages()
       do {
         let response = try await llm.invoke(
           history.filter { $0.role.rawValue != "error" }, 
@@ -165,30 +168,21 @@ extension GPTConsole {
       updateMessages()
     }
     
-    func reset() {
-      history.removeLast(history.count - 1)
-    }
-    
-    func updateDocument() {
-      print("save document to file")
-    }
-    
-    func didEnterApiKey(_ apiKey: String) {
-      llm = .init(apiKey: apiKey)
-      mustEnterApiKey = false
-    }
-    
     func updateMessages() {
       messages = history.enumerated().map {
         .init(id: $0.offset, message: $0.element)
       }
     }
-  }
-}
-
-struct GPTConsole_Previews: PreviewProvider {
-  static var previews: some View {
-    GPTConsole(viewModel: .init(apiKey: ""))
+    
+    func prepareNewDocument() {
+      history = [
+        .init(
+          role: .system, 
+          content: defaultChatGPTPrompt
+        )
+      ]
+      updateMessages()
+    }
   }
 }
 
@@ -241,3 +235,7 @@ extension View {
     modifier(ObserveKeyEventsModifier(observer: observer))
   }
 }
+
+let defaultChatGPTPrompt = """
+"You are a helpful assistant. Respond to user's queries in an informative, professional and honest manner. Be as comprehensive as possible!"
+"""

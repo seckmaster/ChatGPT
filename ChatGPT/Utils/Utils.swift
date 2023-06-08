@@ -133,7 +133,7 @@ func chatToAttributedString(
       var container = AttributeContainer()
       container.foregroundColor = .red
       container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  System\n")
+      var substr = AttributedString("⦿  System\n\n")
       substr.setAttributes(container)
       string.append(substr)
       
@@ -147,7 +147,7 @@ func chatToAttributedString(
       var container = AttributeContainer()
       container.foregroundColor = .orange
       container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  Assistant\n")
+      var substr = AttributedString("⦿  Assistant\n\n")
       substr.setAttributes(container)
       string.append(substr)
       
@@ -161,7 +161,7 @@ func chatToAttributedString(
       var container = AttributeContainer()
       container.foregroundColor = .magenta
       container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  User\n")
+      var substr = AttributedString("⦿  User\n\n")
       substr.setAttributes(container)
       string.append(substr)
       
@@ -175,7 +175,7 @@ func chatToAttributedString(
       var container = AttributeContainer()
       container.foregroundColor = .orange
       container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  Error\n")
+      var substr = AttributedString("⦿  Error\n\n")
       substr.setAttributes(container)
       string.append(substr)
       

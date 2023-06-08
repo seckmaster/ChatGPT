@@ -37,8 +37,7 @@ struct GPTConsoleCell: View {
         } else {
           Text(viewModel.viewingText)
             .onTapGesture {
-              delegate = .init(viewModel: viewModel)
-              isEditing = true
+              beginEditing()
             }
             .overlay(GeometryReader { proxy in
               ZStack {}
@@ -72,7 +71,7 @@ struct GPTConsoleCell: View {
             .buttonStyle(.borderless)
           } else if isHovering {
             Button {
-              isEditing = true
+              beginEditing()
             } label: {
               Image(systemName: "pencil")
                 .frame(width: 40, height: 40)
@@ -87,6 +86,11 @@ struct GPTConsoleCell: View {
         }
       }
     }
+  }
+  
+  func beginEditing() {
+    delegate = .init(viewModel: viewModel)
+    isEditing = true
   }
 }
 
