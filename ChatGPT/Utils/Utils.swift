@@ -7,6 +7,11 @@
 
 import SwiftUI
 import SwiftchainOpenAI
+import RegexBuilder
+
+let isSyntaxHighlightingEnabled = true
+let lock = NSLock()
+var syntaxHighlightingCache = [String: String]()
 
 func parseMarkdown(
   _ markdown: String,
@@ -125,7 +130,7 @@ extension NSFont {
 
 func chatToAttributedString(
   _ chat: [ChatOpenAILLM.Message]
-) -> AttributedString {
+) async -> AttributedString {
   var string = AttributedString()
   for message in chat {
     switch message.role {
@@ -144,6 +149,24 @@ func chatToAttributedString(
       substr.setAttributes(container)
       string.append(substr)
     case .assistant:
+      let regex = Regex {
+        ChoiceOf {
+          "```"
+          "'''"
+        }
+        Capture {
+          OneOrMore(.word)
+          Anchor.endOfLine
+        }
+        Capture {
+          OneOrMore(.any.subtracting(.anyOf(["'" as Character, "`"])))
+        }
+        ChoiceOf {
+          "```"
+          "'''"
+        }
+      }
+      
       var container = AttributeContainer()
       container.foregroundColor = .orange
       container.font = .boldSystemFont(ofSize: 14)
@@ -151,12 +174,58 @@ func chatToAttributedString(
       substr.setAttributes(container)
       string.append(substr)
       
-      container = AttributeContainer()
-      container.foregroundColor = .white
-      container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content + "\n" + "\n")
-      substr.setAttributes(container)
-      string.append(substr)
+      if !isSyntaxHighlightingEnabled {
+        container = AttributeContainer()
+        container.foregroundColor = .white
+        container.font = .systemFont(ofSize: 14)
+        substr = AttributedString(message.content + "\n" + "\n")
+        substr.setAttributes(container)
+        string.append(substr)
+      } else {
+        var lowerBound = message.content.startIndex
+        
+        for match in message.content.matches(of: regex) {
+          do {
+            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+              .appending(path: "chat-gpt-tmp-code.\(match.1)")
+            let html = try await codeToHtml(code: String(match.output.2), url: url)
+            try FileManager.default.removeItem(at: url)
+            let attributedString = try NSMutableAttributedString(
+              data: html.data(using: .utf8)!, 
+              options: [
+                .documentType: NSAttributedString.DocumentType.html, 
+                  .characterEncoding: String.Encoding.utf8.rawValue
+              ],
+              documentAttributes: nil
+            )
+            attributedString.addAttribute(
+              .backgroundColor, 
+              value: NSColor.black, 
+              range: .init(location: 0, length: attributedString.string.utf8.count)
+            )
+            
+            let beforeRange = lowerBound..<match.range.lowerBound
+            container = AttributeContainer()
+            container.foregroundColor = .white
+            container.font = .systemFont(ofSize: 14)
+            substr = AttributedString(message.content[beforeRange])
+            substr.setAttributes(container)
+            string.append(substr)
+            string.append(AttributedString(attributedString))
+            lowerBound = match.range.upperBound
+          } catch {
+            continue
+          }
+        }
+        if lowerBound < message.content.endIndex {
+          container = AttributeContainer()
+          container.foregroundColor = .white
+          container.font = .systemFont(ofSize: 14)
+          substr = AttributedString(message.content[lowerBound..<message.content.endIndex])
+          substr.setAttributes(container)
+          string.append(substr)
+        }
+      }
     case .user:
       var container = AttributeContainer()
       container.foregroundColor = .magenta
@@ -192,8 +261,78 @@ func chatToAttributedString(
   return string
 }
 
+func codeToHtml(code: String, url: URL) async throws -> String {
+  if let html = lock.withLock({ syntaxHighlightingCache[code] }) {
+    print("From cache ...")
+    return html
+  }
+  try code.data(using: .utf8)!.write(to: url)
+  let html = try await executeCommand(
+    executable: .init(filePath: "/opt/homebrew/bin/pygmentize"),
+    arguments: [
+      "-O",
+      "full,style=monokai,lineos=1",
+      "-f",
+      "html",
+      "/" + url.pathComponents.dropFirst().joined(separator: "/")
+    ]
+  )
+  lock.withLock {
+    syntaxHighlightingCache[code] = html
+  }
+  return html
+}
+
 func messageToAttributedString(
   _ message: ChatOpenAILLM.Message
-) -> AttributedString {
-  chatToAttributedString([message])
+) async -> AttributedString {
+  await chatToAttributedString([message])
+}
+
+func executeCommand(
+  executable: URL,
+  arguments: [String] = []
+) async throws -> String {
+  do {
+    guard try executable.checkResourceIsReachable() else { 
+      throw NSError(domain: "Executable \(executable.absoluteString) is not reachable", code: -1)
+    }
+  } catch {
+    throw error
+  }
+  
+  let process = Process()
+  process.executableURL = executable
+  process.arguments = arguments
+  
+  let outputPipe = Pipe()
+  let errorPipe = Pipe()
+  process.standardOutput = outputPipe
+  process.standardError = errorPipe
+  
+  if #available(macOS 10.13, *) {
+    do {
+      try process.run()
+    } catch {
+      throw error
+    }
+  } else {
+    process.launch()
+  }
+  var data = Data()
+  for try await byte in outputPipe.fileHandleForReading.bytes {
+    data.append(byte)
+  }
+  process.waitUntilExit()
+  
+  guard process.terminationStatus == 0 else {
+    throw NSError(domain: "termination status", code: 0)
+  }
+  
+  let output = String(
+    data: data, 
+    encoding: .utf8
+  )?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+  
+  return output
 }

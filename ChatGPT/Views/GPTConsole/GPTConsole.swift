@@ -237,5 +237,5 @@ extension View {
 }
 
 let defaultChatGPTPrompt = """
-"You are a helpful assistant. Respond to user's queries in an informative, professional and honest manner. Be as comprehensive as possible!"
+You are a helpful assistant. Respond to user's queries in an informative, professional and honest manner. Be as comprehensive as possible!
 """

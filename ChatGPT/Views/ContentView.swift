@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftchainOpenAI
+import RegexBuilder
 
 struct ContentView: View {
   @State var isShowingDocumentsView = true
@@ -57,6 +58,59 @@ struct ContentView: View {
     )
     .onAppear {
       apiKey = try? ConfigStorage().config.apiKey
+      let text = """
+      Here's a simple C++ program to generate Fibonacci numbers:
+      
+      ```cpp
+      #include <iostream>
+      
+      int main() {
+      int n, first = 0, second = 1, next;
+      
+      std::cout << "Enter the number of Fibonacci numbers to generate: ";
+      std::cin >> n;
+      
+      std::cout << "Fibonacci series: ";
+      
+      for (int i = 0; i < n; ++i) {
+        if (i <= 1) {
+            next = i;
+        } else {
+            next = first + second;
+            first = second;
+            second = next;
+        }
+        std::cout << next << " ";
+      }
+      
+      std::cout << std::endl;
+      return 0;
+      }
+      ```
+      
+      This program prompts the user to enter the number of Fibonacci numbers to generate, then calculates and prints the Fibonacci series up to the specified length. The Fibonacci sequence starts with 0 and 1, and each subsequent number is the sum of the previous two numbers.
+      """
+      text.matches(of: Regex {
+        ChoiceOf {
+          "```"
+          "'''"
+        }
+        Capture {
+          OneOrMore(.word)
+          Anchor.endOfLine
+        }
+        Capture {
+          OneOrMore(.any)
+        }
+        ChoiceOf {
+          "```"
+          "'''"
+        }
+      }).forEach { match in
+        print(match.output.1)
+        print()
+        print(match.output.2)
+      }
     }
   }
   

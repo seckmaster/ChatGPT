@@ -114,26 +114,33 @@ extension GPTConsoleCell {
     @Published var viewingText: AttributedString
     @Published var text: AttributedString
     
+    @MainActor
     init(message: Message, modifier: @escaping (AttributedString) -> Void) {
       self.message = message
       var container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
       self.text = AttributedString(message.message.content, attributes: container)
-      self.viewingText = messageToAttributedString(message.message)
+      self.viewingText = .init()
       self.modifier = modifier
+      Task {
+        self.viewingText = await messageToAttributedString(message.message)
+      }
     }
     
     func updateDocument() {
       modifier(text)
     }
     
+    @MainActor
     func updateText() {
       message.message = .init(
         role: message.message.role,
         content: .init(text.characters[...])
       )
-      viewingText = messageToAttributedString(message.message)
+      Task {
+        viewingText = await messageToAttributedString(message.message)
+      }
     }
   }
 }
