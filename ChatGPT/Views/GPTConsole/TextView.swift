@@ -110,7 +110,7 @@ class TextViewDelegate<ViewModel: EditingViewModel>: NSObject, OldSchoolTextView
 #if os(macOS)
   func textView(_ textView: NSTextView, willChangeSelectionFromCharacterRanges oldSelectedCharRanges: [NSValue], toCharacterRanges newSelectedCharRanges: [NSValue]) -> [NSValue] {
     guard let range = newSelectedCharRanges.first as? NSRange else { return newSelectedCharRanges }
-    guard textView.string.utf16.count >= range.upperBound else { return newSelectedCharRanges }
+    guard textView.string.utf16.count > range.upperBound else { return newSelectedCharRanges }
     
     let attrSubstr = textView.attributedString().fontAttributes(in: range)
     let isBold     = (attrSubstr[.font] as? NSFont)?.isBold ?? false

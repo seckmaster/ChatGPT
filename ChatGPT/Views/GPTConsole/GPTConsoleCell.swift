@@ -39,12 +39,13 @@ struct GPTConsoleCell: View {
             .onTapGesture {
               beginEditing()
             }
-            .overlay(GeometryReader { proxy in
-              ZStack {}
-                .onAppear {
-                  height = max(height ?? 0, proxy.size.height)
-                }
+            .background(GeometryReader { proxy in
+              Color.clear
+                .preference(key: SizePreferenceKey.self, value: proxy.size)
             })
+            .onPreferenceChange(SizePreferenceKey.self) { 
+              height = $0.height
+            }
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
@@ -144,3 +145,12 @@ extension GPTConsoleCell {
 }
 
 extension AttributedString: @unchecked Sendable {}
+
+struct SizePreferenceKey: PreferenceKey {
+  typealias Value = CGSize
+  static var defaultValue: Value = .zero
+  
+  static func reduce(value _: inout Value, nextValue: () -> Value) {
+    _ = nextValue()
+  }
+}
