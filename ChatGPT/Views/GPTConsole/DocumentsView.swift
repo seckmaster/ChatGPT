@@ -25,7 +25,7 @@ struct DocumentsView: View {
   var body: some View {
     VStack {
       Button {
-        viewModel.activePostID = nil
+        viewModel.activeDocumentId = nil
         didSelectDocument(nil)
       } label: {
         HStack(spacing: 8) {
@@ -46,15 +46,33 @@ struct DocumentsView: View {
       List {
         ForEach(viewModel.documents) { document in
           Button {
-            viewModel.activePostID = document.id
+            guard viewModel.activeDocumentId != document.id else { return }
+            viewModel.isEditinDocumentTitle = false
+            viewModel.activeDocumentId = document.id
+            viewModel.editableDocumentTitle = document.title ?? ""
             didSelectDocument(document.history)
           } label: {
             HStack {
               DocumentCell(
                 documentID: document.id, 
-                title: document.displayName
+                title: document.displayName,
+                editableTitle: $viewModel.editableDocumentTitle,
+                isEditingTitle: document.id == viewModel.activeDocumentId ? $viewModel.isEditinDocumentTitle : .constant(false)
               )
               Spacer()
+              if viewModel.activeDocumentId == document.id {
+                Button {
+                  viewModel.isEditinDocumentTitle.toggle()
+                  if !viewModel.isEditinDocumentTitle {
+                    viewModel.updateDocumentTitle(newTitle: viewModel.editableDocumentTitle)
+                  }
+                } label: {
+                  Image(systemName: viewModel.isEditinDocumentTitle ? "checkmark.circle" : "pencil")
+                    .frame(width: 30, height: 30)
+                }
+                .buttonStyle(.borderless)
+                .background(Color.palette.background2)
+              }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 60)
@@ -72,7 +90,7 @@ struct DocumentsView: View {
             try? viewModel.documentsStorage.delete(documentID: viewModel.documents[index].id)
           }
           viewModel.loadDocuments()
-          viewModel.activePostID = nil
+          viewModel.activeDocumentId = nil
           didSelectDocument(nil)
         }
       }
@@ -84,13 +102,13 @@ struct DocumentsView: View {
   }
   
   func background(documentID: Document.ID) -> Color {
-    if hoveringDocumentID == documentID && viewModel.activePostID == documentID {
+    if hoveringDocumentID == documentID && viewModel.activeDocumentId == documentID {
       return .palette.background1
     }
     if hoveringDocumentID == documentID {
       return .palette.background
     }
-    if viewModel.activePostID == documentID {
+    if viewModel.activeDocumentId == documentID {
       return .palette.background2
     }
     return .clear
@@ -101,15 +119,26 @@ extension DocumentsView {
   struct DocumentCell: View {
     let documentID: Document.ID
     let title: String
+    @Binding var editableTitle: String
+    @Binding var isEditingTitle: Bool
     
     var body: some View {
       HStack(spacing: 12) {
         Image(systemName: "bubble.left")
-        Text(title)
-          .foregroundColor(.white)
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .multilineTextAlignment(.leading)
-          .font(.system(size: 14))
+        if isEditingTitle {
+          TextField(text: $editableTitle) { Text("Title") }
+            .foregroundColor(.white)
+            .background(Color.clear)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .multilineTextAlignment(.leading)
+            .font(.system(size: 14))
+        } else {
+          Text(title)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .multilineTextAlignment(.leading)
+            .font(.system(size: 14))
+        }
       }
     }
   }
@@ -120,7 +149,9 @@ extension DocumentsView {
     let documentsStorage = DocumentsStorage()
     
     @Published var documents: [Document] = []
-    @Published var activePostID: Document.ID?
+    @Published var activeDocumentId: Document.ID?
+    @Published var isEditinDocumentTitle = false
+    @Published var editableDocumentTitle = ""
     
     var apiKey: String? {
       didSet {
@@ -144,7 +175,7 @@ extension DocumentsView {
           )
           try documentsStorage.store(document: document)
           loadDocuments()
-          activePostID = document.id
+          activeDocumentId = document.id
           Task { @MainActor in
             do {
               let response = try await llm.invoke(
@@ -173,10 +204,10 @@ extension DocumentsView {
           print("Storing a document failed with error:", error)
         }
       } else {
-        guard let activePostID else {
+        guard let activeDocumentId else {
           fatalError("Invalid state?")
         }
-        var document = documents.first { $0.id == activePostID }!
+        var document = documents.first { $0.id == activeDocumentId }!
         document.history = history
         document.lastModifiedAt = Date()
         do {
@@ -196,6 +227,18 @@ extension DocumentsView {
           .sorted { $0.createdAt > $1.createdAt }
       } catch {
         print("Loading documents failed with error:", error)
+      }
+    }
+    
+    func updateDocumentTitle(newTitle title: String) {
+      guard var document = documents.first(where: { $0.id == activeDocumentId }) else { return }
+      document.title = title
+      document.lastModifiedAt = Date()
+      do {
+        try documentsStorage.store(document: document)
+        loadDocuments()
+      } catch {
+        print("Storing a document failed with error:", error)
       }
     }
   }

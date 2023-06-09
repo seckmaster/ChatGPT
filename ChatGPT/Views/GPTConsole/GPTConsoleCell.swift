@@ -23,7 +23,7 @@ struct GPTConsoleCell: View {
     modifier: @escaping (AttributedString) -> Void,
     didStopEditing: @escaping () -> Void
   ) {
-    viewModel = .init(message: message, modifier: modifier)
+    self.viewModel = .init(message: message, modifier: modifier)
     self.didStopEditing = didStopEditing
   }
   
@@ -42,8 +42,7 @@ struct GPTConsoleCell: View {
             .overlay(GeometryReader { proxy in
               ZStack {}
                 .onAppear {
-                  guard height == nil, proxy.size.height > 0 else { return }
-                  height = proxy.size.height
+                  height = max(height ?? 0, proxy.size.height)
                 }
             })
         }
