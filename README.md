@@ -12,7 +12,7 @@ You can perform any actions that you would expect, and more!
 
 For example, our implementation of ChatGPT allows you to remove specific messages from the history or edit their content. This allows for more dynamic control over the chat history.
 
-You can delete a message by swiping left on the message cell:
+To delete a message, swipe left on the message cell:
 
 ![Delete a Message](docs/assets/3.png)
 
@@ -30,4 +30,17 @@ You can also delete existing documents by swiping left on the document cell:
 
 The title of the document is automatically generated using GPT; however, you can change the title if you wish:
 
-![Change the Title](docs/assets/5.png)
+![Change document title](docs/assets/5.png)
+
+### Syntax Highlighting
+
+To enable syntax highlighting, install [Pygments](https://formulae.brew.sh/formula/pygments). There are still several improvements to be made regarding syntax highlighting, but the basic functionality works:
+
+![Syntax highlighting](docs/assets/9.png)
+
+## Roadmap
+
+- [ ] Streaming API integration
+- [ ] Improved syntax highlighting
+
+Our roadmap includes integrating the Streaming API for real-time communication and enhancing the syntax highlighting feature for a better user experience. Stay tuned for updates and improvements!
