@@ -26,7 +26,7 @@ After editing, save your changes by tapping the checkmark:
 
 You can also delete existing documents by swiping left on the document cell:
 
-![Delete a Document](docs/assets/8.png)
+![Delete a Document](docs/assets/4.png)
 
 The title of the document is automatically generated using GPT; however, you can change the title if you wish:
 
