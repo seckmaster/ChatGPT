@@ -64,7 +64,8 @@ struct DocumentsStorage {
   }
   
   private var url: URL {
-    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appending(path: "documents")
+    FileManager.default.appStorageURL
+      .appending(path: "documents")
   }
 }
 

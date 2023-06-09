@@ -30,9 +30,7 @@ struct ConfigStorage {
   }
   
   private var url: URL {
-    FileManager.default.urls(
-      for: .documentDirectory, 
-      in: .userDomainMask
-    )[0].appendingPathComponent("config")
+    FileManager.default.appStorageURL
+      .appending(path: "config")
   }
 }
