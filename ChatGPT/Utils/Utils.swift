@@ -12,6 +12,7 @@ import RegexBuilder
 let isSyntaxHighlightingEnabled = true
 let lock = NSLock()
 var syntaxHighlightingCache = [String: String]()
+var cachedPygmentsExecutableURL: URL?
 
 func parseMarkdown(
   _ markdown: String,
@@ -197,11 +198,6 @@ func chatToAttributedString(
               ],
               documentAttributes: nil
             )
-            attributedString.addAttribute(
-              .backgroundColor, 
-              value: NSColor.black, 
-              range: .init(location: 0, length: attributedString.string.utf8.count)
-            )
             
             let beforeRange = lowerBound..<match.range.lowerBound
             container = AttributeContainer()
@@ -261,13 +257,27 @@ func chatToAttributedString(
 }
 
 func codeToHtml(code: String, url: URL) async throws -> String {
+  func fetchPygmentsExecutableURL() async throws -> URL {
+//    if let url = lock.withLock({ cachedPygmentsExecutableURL }) { return url }
+//    let path = try await executeCommand(
+//      executable: .init(filePath: "/usr/bin/which"), 
+//      arguments: ["pygmentize"]
+//    )
+//    let executableUrl = URL(filePath: path)
+//    lock.withLock { 
+//      cachedPygmentsExecutableURL = executableUrl
+//    }
+//    return executableUrl
+    return .init(filePath: "/opt/homebrew/bin/pygmentize")
+  }
+  
   if let html = lock.withLock({ syntaxHighlightingCache[code] }) {
     print("From cache ...")
     return html
   }
   try code.data(using: .utf8)!.write(to: url)
   let html = try await executeCommand(
-    executable: .init(filePath: "/opt/homebrew/bin/pygmentize"),
+    executable: try await fetchPygmentsExecutableURL(),
     arguments: [
       "-O",
       "full,style=monokai,lineos=1",
@@ -310,14 +320,10 @@ func executeCommand(
   process.standardOutput = outputPipe
   process.standardError = errorPipe
   
-  if #available(macOS 10.13, *) {
-    do {
-      try process.run()
-    } catch {
-      throw error
-    }
-  } else {
-    process.launch()
+  do {
+    try process.run()
+  } catch {
+    throw error
   }
   var data = Data()
   for try await byte in outputPipe.fileHandleForReading.bytes {
