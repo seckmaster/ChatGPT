@@ -281,6 +281,8 @@ func codeToHtml(code: String, url: URL) async throws -> String {
     arguments: [
       "-O",
       "full,style=monokai,lineos=1",
+      "-l",
+      String(url.lastPathComponent.split(separator: ".")[1]),
       "-f",
       "html",
       "/" + url.pathComponents.dropFirst().joined(separator: "/")

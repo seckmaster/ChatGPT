@@ -12,7 +12,6 @@ import SwiftchainOpenAI
 struct GPTConsoleCell: View {
   @ObservedObject var viewModel: ViewModel
   @State var background: Color = Color.palette.background1
-  @State var height: CGFloat?
   @State var isEditing = false
   @State var isHovering = false
   @State var delegate: TextViewDelegate<ViewModel>!
@@ -29,26 +28,22 @@ struct GPTConsoleCell: View {
   
   var body: some View {
     ZStack {
-      HStack {
-        if isEditing, let height {
-          TextView<ViewModel>(text: $viewModel.text, delegate: delegate)
-            .frame(maxWidth: .infinity)
-            .frame(height: height)
-        } else {
+      ZStack {
+        HStack {
           Text(viewModel.viewingText)
             .onTapGesture {
               beginEditing()
             }
-            .background(GeometryReader { proxy in
-              Color.clear
-                .preference(key: SizePreferenceKey.self, value: proxy.size)
-            })
-            .onPreferenceChange(SizePreferenceKey.self) { 
-              height = $0.height
-            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .opacity(isEditing ? 0 : 1)
+        HStack {
+          TextView<ViewModel>(text: $viewModel.text, delegate: delegate)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .opacity(isEditing ? 1 : 0)
+        .frame(maxWidth: .infinity, alignment: .leading)
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
       .padding()
       .background(background)
       .onHover { over in
@@ -145,12 +140,3 @@ extension GPTConsoleCell {
 }
 
 extension AttributedString: @unchecked Sendable {}
-
-struct SizePreferenceKey: PreferenceKey {
-  typealias Value = CGSize
-  static var defaultValue: Value = .zero
-  
-  static func reduce(value _: inout Value, nextValue: () -> Value) {
-    _ = nextValue()
-  }
-}
