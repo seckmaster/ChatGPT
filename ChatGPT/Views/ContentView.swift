@@ -43,7 +43,8 @@ struct ContentView: View {
                       content: text
                     )
                   }
-                  documentsViewModel.updateDocument()
+                  let document = documentsViewModel.documents.first(where: { $0.id == documentsViewModel.activeDocumentId! })!
+                  documentsViewModel.storeDocument(document)
                 }
               )
               input(height: proxy.size.height * 0.3 - 40)
@@ -126,7 +127,8 @@ struct ContentView: View {
       role: .user, 
       content: editingText
     ))
-    documentsViewModel.updateDocument()
+    documentsViewModel.createNewDocumentIfNecessary()
+    let documentID = documentsViewModel.activeDocumentId! 
     
     let editingText = editingText
       .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -138,17 +140,21 @@ struct ContentView: View {
         content: content,
         history: documentsViewModel.activeDocumentHistory
       )
-      documentsViewModel.activeDocumentHistory.append(.init(
-        role: .assistant, 
-        content: response ?? "<no response>"
-      ))
-      documentsViewModel.updateDocument()
+      documentsViewModel.appendMessage(
+        .init(
+          role: .assistant, 
+          content: response ?? "<no response>"
+        ),
+        documentID: documentID
+      )
     } catch {
-      documentsViewModel.activeDocumentHistory.append(.init(
-        role: .custom("Error"), 
-        content: "There was an issue with calling GPT4:\n\(String(describing: error))"
-      ))
-      documentsViewModel.updateDocument()
+      documentsViewModel.appendMessage(
+        .init(
+          role: .custom("Error"), 
+          content: "There was an issue with calling GPT4:\n\(String(describing: error))"
+        ),
+        documentID: documentID
+      )
     }
     isLoading = false
   }

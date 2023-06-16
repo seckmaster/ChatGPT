@@ -165,61 +165,45 @@ extension DocumentsView {
     }
     
     @MainActor
-    func updateDocument() {
-      guard activeDocumentHistory.count >= 2 else { return }
+    func createNewDocumentIfNecessary() {
+      guard activeDocumentHistory.count == 2 else { return }
       
-      let isNewDocument = activeDocumentHistory.count == 2 // system + user
-      if isNewDocument {
-        do {
-          var document = Document(
-            id: .init(), 
-            history: activeDocumentHistory, 
-            createdAt: .init(), 
-            lastModifiedAt: .init() 
-          )
-          try documentsStorage.store(document: document)
-          loadDocuments()
-          activeDocumentId = document.id
-          Task { @MainActor in
-            do {
-              let response = try await llm.invoke(
-                [
-                  .init(
-                    role: .user, 
-                    content: """
+      do {
+        var document = Document(
+          id: .init(), 
+          history: activeDocumentHistory, 
+          createdAt: .init(), 
+          lastModifiedAt: .init() 
+        )
+        try documentsStorage.store(document: document)
+        loadDocuments()
+        activeDocumentId = document.id
+        Task { @MainActor in
+          do {
+            let response = try await llm.invoke(
+              [
+                .init(
+                  role: .user, 
+                  content: """
                   Provide a short title for a document. The document starts with the following user query: 
                   
                   User query: \(activeDocumentHistory[1].content)
                   """
-                  )
-                ], 
-                temperature: 1.0, 
-                numberOfVariants: 1, 
-                model: "gpt-4"
-              )
-              document.title = response.messages.first?.content
-              try documentsStorage.store(document: document)
-              loadDocuments()
-            } catch {
-              print("Error while fetching title for the document!")
-            }
+                )
+              ], 
+              temperature: 1.0, 
+              numberOfVariants: 1, 
+              model: "gpt-4"
+            )
+            document.title = response.messages.first?.content
+            try documentsStorage.store(document: document)
+            loadDocuments()
+          } catch {
+            print("Error while fetching title for the document!")
           }
-        } catch {
-          print("Storing a document failed with error:", error)
         }
-      } else {
-        guard let activeDocumentId else {
-          fatalError("Invalid state?")
-        }
-        var document = documents.first { $0.id == activeDocumentId }!
-        document.history = activeDocumentHistory
-        document.lastModifiedAt = Date()
-        do {
-          try documentsStorage.store(document: document)
-          loadDocuments()
-        } catch {
-          print("Storing a document failed with error:", error)
-        }
+      } catch {
+        print("Storing a document failed with error:", error)
       }
     }
     
@@ -233,13 +217,29 @@ extension DocumentsView {
       }
     }
     
+    func appendMessage(
+      _ message: ChatOpenAILLM.Message,
+      documentID: Document.ID
+    ) {
+      let index = documents.firstIndex(where: { $0.id == documentID })!
+      documents[index].history.append(message)
+      documents[index].lastModifiedAt = Date()
+      storeDocument(documents[index])
+    }
+    
     func updateDocumentTitle(newTitle title: String) {
       guard var document = documents.first(where: { $0.id == activeDocumentId }) else { return }
       document.title = title
       document.lastModifiedAt = Date()
+      storeDocument(document)
+    }
+    
+    func storeDocument(_ document: Document, reload: Bool = true) {
       do {
         try documentsStorage.store(document: document)
-        loadDocuments()
+        if reload {
+          loadDocuments()
+        }
       } catch {
         print("Storing a document failed with error:", error)
       }
