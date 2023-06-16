@@ -44,8 +44,7 @@ struct ContentView: View {
                     )
                     documentsViewModel.updateActiveHistory()
                   }
-                  let document = documentsViewModel.documents.first(where: { $0.id == documentsViewModel.activeDocumentId! })!
-                  documentsViewModel.storeDocument(document)
+                  documentsViewModel.storeActiveDocument()
                 }
               )
               input(height: proxy.size.height * 0.3 - 40)
