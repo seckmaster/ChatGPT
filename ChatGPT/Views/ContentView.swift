@@ -10,36 +10,47 @@ import SwiftchainOpenAI
 import RegexBuilder
 
 struct ContentView: View {
-  @State var isShowingDocumentsView = true
+//  @State var isShowingDocumentsView = true
+  @State var editingText: String = ""
+  @State var isLoading: Bool = false
   @State var showEnterApiKey = false
   @State var apiKey: String? {
     didSet {
       showEnterApiKey = apiKey == nil
+      viewModel.apiKey = apiKey
       documentsViewModel.apiKey = apiKey
-      consoleViewModel.apiKey = apiKey
     }
   }
-  @ObservedObject var consoleViewModel: GPTConsole.ViewModel = .init()
   @ObservedObject var documentsViewModel: DocumentsView.ViewModel = .init()
+  @ObservedObject var viewModel: ViewModel = .init()
   
   var body: some View {
     VStack {
       HStack(spacing: 20) {
-        if isShowingDocumentsView {
-          try? DocumentsView(viewModel: documentsViewModel) {
-            if let history = $0 {
-              consoleViewModel.history = history
-              consoleViewModel.updateMessages()
-            } else {
-              consoleViewModel.prepareNewDocument()
+//        if isShowingDocumentsView {
+        DocumentsView(viewModel: documentsViewModel)
+          .frame(maxWidth: 350)
+//        }
+        if apiKey != nil {
+          GeometryReader { proxy in
+            VStack {
+              GPTConsole(
+                history: $documentsViewModel.activeDocumentHistory,
+                didUpdateDocument: { updatedMessage in
+                  if let (index, text) = updatedMessage {
+                    documentsViewModel.activeDocumentHistory[index] = .init(
+                      role: documentsViewModel.activeDocumentHistory[index].role, 
+                      content: text
+                    )
+                  }
+                  documentsViewModel.updateDocument()
+                }
+              )
+              input(height: proxy.size.height * 0.3 - 40)
             }
           }
-          .frame(maxWidth: 350)
-        }
-        if apiKey != nil {
-          GPTConsole(viewModel: consoleViewModel) {
-            didUpdateDocument(history: $0)
-          }
+          .padding(.all, 10)
+          .background(Color.palette.background1)
         }
       }
     }
@@ -61,7 +72,115 @@ struct ContentView: View {
     }
   }
   
-  func didUpdateDocument(history: ChatOpenAILLM.Messages) {
-    documentsViewModel.didUpdateDocument(history: history)
+  @ViewBuilder func input(height: CGFloat) -> some View {
+    ZStack {
+      HStack {
+        TextEditor(text: $editingText)
+          .font(Font.system(size: 14))
+          .scrollContentBackground(.hidden)
+      }
+      .padding()
+      HStack { 
+        Spacer()
+        VStack {
+          Spacer()
+          
+          LoadingButton(isLoading: $isLoading) { 
+            Task {
+              await callGPT()
+            }
+          } label: { 
+            Image(systemName: "paperplane.fill")
+              .frame(width: 50, height: 50)
+          }
+          .background(Color.palette.background)
+          .buttonStyle(.borderless)
+        }
+        .padding()
+      }
+    }
+    .frame(height: min(300, max(120, height)))
+    .background(Color.palette.background2)
+    .cornerRadius(12)
+    .onKeyDown { event in
+      let enterKeyCode: UInt16 = 36 // 'enter'
+      let kKeyKode: UInt16 = 40     // 'k'
+      switch (event.keyCode, event.modifierFlags.contains(.command)) {
+      case (enterKeyCode, true):
+        Task {
+          await callGPT()
+        }
+      case (kKeyKode, true):
+        editingText = ""
+      case _:
+        break
+      }
+    }
+  }
+  
+  @MainActor
+  func callGPT() async {
+    guard !editingText.isEmpty else { return }
+    
+    documentsViewModel.activeDocumentHistory.append(.init(
+      role: .user, 
+      content: editingText
+    ))
+    documentsViewModel.updateDocument()
+    
+    let editingText = editingText
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    do {
+      isLoading = true
+      let content = editingText
+      self.editingText = ""
+      let response = try await viewModel.callGPT(
+        content: content,
+        history: documentsViewModel.activeDocumentHistory
+      )
+      documentsViewModel.activeDocumentHistory.append(.init(
+        role: .assistant, 
+        content: response ?? "<no response>"
+      ))
+      documentsViewModel.updateDocument()
+    } catch {
+      documentsViewModel.activeDocumentHistory.append(.init(
+        role: .custom("Error"), 
+        content: "There was an issue with calling GPT4:\n\(String(describing: error))"
+      ))
+      documentsViewModel.updateDocument()
+    }
+    isLoading = false
+  }
+}
+
+extension ContentView {
+  class ViewModel: ObservableObject {
+    var apiKey: String? {
+      didSet {
+        llm = .init(
+          apiKey: apiKey,
+          defaultTemperature: 0.3, 
+          defaultNumberOfVariants: 1, 
+          defaultModel: "gpt-4"
+        )
+      }
+    }
+    private var llm: ChatOpenAILLM = .init(
+      defaultTemperature: 0.3, 
+      defaultNumberOfVariants: 1, 
+      defaultModel: "gpt-4"
+    )
+    
+    func callGPT(content: String, history: ChatOpenAILLM.Messages) async throws -> String? {
+      let response = try await llm.invoke(
+        history.filter { $0.role.rawValue != "error" }, 
+        temperature: 0.0, 
+        numberOfVariants: 1, 
+        model: "gpt-4"
+      )
+      guard !response.messages.isEmpty else { return nil }
+      return response.messages[0].content
+    }
   }
 }

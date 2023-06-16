@@ -15,14 +15,13 @@ struct GPTConsoleCell: View {
   @State var isEditing = false
   @State var isHovering = false
   @State var delegate: TextViewDelegate<ViewModel>!
-  var didStopEditing: () -> Void
+  var didStopEditing: (String) -> Void
   
   init(
     message: Message, 
-    modifier: @escaping (AttributedString) -> Void,
-    didStopEditing: @escaping () -> Void
+    didStopEditing: @escaping (String) -> Void
   ) {
-    self.viewModel = .init(message: message, modifier: modifier)
+    self.viewModel = .init(message: message)
     self.didStopEditing = didStopEditing
   }
   
@@ -57,7 +56,7 @@ struct GPTConsoleCell: View {
             Button {
               viewModel.updateText()
               isEditing = false
-              didStopEditing()
+              didStopEditing(.init(viewModel.text.characters))
             } label: {
               Image(systemName: "checkmark.rectangle.fill")
                 .frame(width: 40, height: 40)
@@ -97,7 +96,6 @@ extension GPTConsoleCell {
   
   class ViewModel: EditingViewModel {
     var message: Message
-    let modifier: (AttributedString) -> Void
     
     @Published var isBoldHighlighted: Bool = false
     @Published var isItalicHighlighted: Bool = false
@@ -109,21 +107,19 @@ extension GPTConsoleCell {
     @Published var viewingText: AttributedString
     @Published var text: AttributedString
     
-    init(message: Message, modifier: @escaping (AttributedString) -> Void) {
+    init(message: Message) {
       self.message = message
       var container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
       self.text = AttributedString(message.message.content, attributes: container)
       self.viewingText = .init()
-      self.modifier = modifier
       Task { @MainActor in
         self.viewingText = await messageToAttributedString(message.message)
       }
     }
     
     func updateDocument() {
-      modifier(text)
     }
     
     @MainActor

@@ -12,21 +12,17 @@ import SwiftchainOpenAI
 struct DocumentsView: View {
   @ObservedObject var viewModel: ViewModel
   @State var hoveringDocumentID: Document.ID?
-  var didSelectDocument: (ChatOpenAILLM.Messages?) -> Void
   
   init(
-    viewModel: ViewModel,
-    didSelectDocument: @escaping (ChatOpenAILLM.Messages?) -> Void
-  ) throws {
+    viewModel: ViewModel
+  ) {
     self.viewModel = viewModel
-    self.didSelectDocument = didSelectDocument
   }
   
   var body: some View {
     VStack {
       Button {
         viewModel.activeDocumentId = nil
-        didSelectDocument(nil)
       } label: {
         HStack(spacing: 8) {
           Image(systemName: "plus.bubble.fill")
@@ -47,27 +43,26 @@ struct DocumentsView: View {
         ForEach(viewModel.documents) { document in
           Button {
             guard viewModel.activeDocumentId != document.id else { return }
-            viewModel.isEditinDocumentTitle = false
+            viewModel.isEditingDocumentTitle = false
             viewModel.activeDocumentId = document.id
             viewModel.editableDocumentTitle = document.title ?? ""
-            didSelectDocument(document.history)
           } label: {
             HStack {
               DocumentCell(
                 documentID: document.id, 
                 title: document.displayName,
                 editableTitle: $viewModel.editableDocumentTitle,
-                isEditingTitle: document.id == viewModel.activeDocumentId ? $viewModel.isEditinDocumentTitle : .constant(false)
+                isEditingTitle: document.id == viewModel.activeDocumentId ? $viewModel.isEditingDocumentTitle : .constant(false)
               )
               Spacer()
               if viewModel.activeDocumentId == document.id {
                 Button {
-                  viewModel.isEditinDocumentTitle.toggle()
-                  if !viewModel.isEditinDocumentTitle {
+                  viewModel.isEditingDocumentTitle.toggle()
+                  if !viewModel.isEditingDocumentTitle {
                     viewModel.updateDocumentTitle(newTitle: viewModel.editableDocumentTitle)
                   }
                 } label: {
-                  Image(systemName: viewModel.isEditinDocumentTitle ? "checkmark.circle" : "pencil")
+                  Image(systemName: viewModel.isEditingDocumentTitle ? "checkmark.circle" : "pencil")
                     .frame(width: 30, height: 30)
                 }
                 .buttonStyle(.borderless)
@@ -91,7 +86,6 @@ struct DocumentsView: View {
           }
           viewModel.loadDocuments()
           viewModel.activeDocumentId = nil
-          didSelectDocument(nil)
         }
       }
     }
@@ -146,30 +140,40 @@ extension DocumentsView {
 
 extension DocumentsView {
   class ViewModel: ObservableObject {
+    private var llm: ChatOpenAILLM!
+    
     let documentsStorage = DocumentsStorage()
     
     @Published var documents: [Document] = []
-    @Published var activeDocumentId: Document.ID?
-    @Published var isEditinDocumentTitle = false
+    @Published var activeDocumentId: Document.ID? {
+      didSet {
+        activeDocumentHistory = activeDocumentId.flatMap { id in documents.first(where: { $0.id == id }) }?.history ?? .default
+      }
+    }
+    @Published var isEditingDocumentTitle = false
     @Published var editableDocumentTitle = ""
+    @Published var activeDocumentHistory: ChatOpenAILLM.Messages
     
     var apiKey: String? {
       didSet {
-        llm = apiKey.map { .init(apiKey: $0) }
+        llm = .init(apiKey: apiKey)
       }
     }
     
-    private var llm: ChatOpenAILLM!
+    init() {
+      activeDocumentHistory = .default
+    }
     
     @MainActor
-    func didUpdateDocument(history: ChatOpenAILLM.Messages) {
-      if history.count < 2 { fatalError() }
-      let isNewDocument = history.count == 2 // system + user
+    func updateDocument() {
+      guard activeDocumentHistory.count >= 2 else { return }
+      
+      let isNewDocument = activeDocumentHistory.count == 2 // system + user
       if isNewDocument {
         do {
           var document = Document(
             id: .init(), 
-            history: history, 
+            history: activeDocumentHistory, 
             createdAt: .init(), 
             lastModifiedAt: .init() 
           )
@@ -183,9 +187,9 @@ extension DocumentsView {
                   .init(
                     role: .user, 
                     content: """
-                  Provide a document a short title for the following start of the conversation:
+                  Provide a short title for a document. The document starts with the following user query: 
                   
-                  Conversation: \(history[1].content)
+                  User query: \(activeDocumentHistory[1].content)
                   """
                   )
                 ], 
@@ -208,12 +212,11 @@ extension DocumentsView {
           fatalError("Invalid state?")
         }
         var document = documents.first { $0.id == activeDocumentId }!
-        document.history = history
+        document.history = activeDocumentHistory
         document.lastModifiedAt = Date()
         do {
           try documentsStorage.store(document: document)
           loadDocuments()
-          print("Did update document with id: \(document.id)")
         } catch {
           print("Storing a document failed with error:", error)
         }
@@ -241,5 +244,13 @@ extension DocumentsView {
         print("Storing a document failed with error:", error)
       }
     }
+  }
+}
+
+extension ChatOpenAILLM.Messages {
+  static var `default`: ChatOpenAILLM.Messages {
+    [
+      .init(role: .system, content: defaultChatGPTPrompt)
+    ]
   }
 }
