@@ -42,6 +42,7 @@ struct ContentView: View {
                       role: documentsViewModel.activeDocumentHistory[index].role, 
                       content: text
                     )
+                    documentsViewModel.updateActiveHistory()
                   }
                   let document = documentsViewModel.documents.first(where: { $0.id == documentsViewModel.activeDocumentId! })!
                   documentsViewModel.storeDocument(document)
@@ -120,14 +121,18 @@ struct ContentView: View {
   }
   
   @MainActor
-  func callGPT() async {
+  func callGPT() async { // TODO: - Move this business logic into the ViewModel
     guard !editingText.isEmpty else { return }
     
     documentsViewModel.activeDocumentHistory.append(.init(
       role: .user, 
-      content: editingText
+      content: editingText.trimmingCharacters(in: .whitespacesAndNewlines)
     ))
-    documentsViewModel.createNewDocumentIfNecessary()
+    if documentsViewModel.activeDocumentId == nil {
+      documentsViewModel.createNewDocument()
+    } else {
+      documentsViewModel.storeActiveDocument()
+    }
     let documentID = documentsViewModel.activeDocumentId! 
     
     let editingText = editingText
@@ -147,6 +152,9 @@ struct ContentView: View {
         ),
         documentID: documentID
       )
+      if documentID == documentsViewModel.activeDocumentId {
+        documentsViewModel.updateActiveHistory()
+      }
     } catch {
       documentsViewModel.appendMessage(
         .init(
@@ -155,6 +163,9 @@ struct ContentView: View {
         ),
         documentID: documentID
       )
+      if documentID == documentsViewModel.activeDocumentId {
+        documentsViewModel.updateActiveHistory()
+      }
     }
     isLoading = false
   }

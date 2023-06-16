@@ -146,7 +146,7 @@ func chatToAttributedString(
       container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content + "\n" + "\n")
+      substr = AttributedString(message.content)
       substr.setAttributes(container)
       string.append(substr)
     case .assistant:
@@ -179,7 +179,7 @@ func chatToAttributedString(
         container = AttributeContainer()
         container.foregroundColor = .white
         container.font = .systemFont(ofSize: 14)
-        substr = AttributedString(message.content + "\n" + "\n")
+        substr = AttributedString(message.content)
         substr.setAttributes(container)
         string.append(substr)
       } else {
@@ -232,7 +232,7 @@ func chatToAttributedString(
       container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content + "\n" + "\n")
+      substr = AttributedString(message.content)
       substr.setAttributes(container)
       string.append(substr)
     case .custom("error"):
@@ -246,7 +246,7 @@ func chatToAttributedString(
       container = AttributeContainer()
       container.foregroundColor = .red
       container.font = .systemFont(ofSize: 12)
-      substr = AttributedString(message.content + "\n" + "\n")
+      substr = AttributedString(message.content)
       substr.setAttributes(container)
       string.append(substr)
     case _:

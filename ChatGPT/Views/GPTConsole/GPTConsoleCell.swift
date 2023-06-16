@@ -28,13 +28,12 @@ struct GPTConsoleCell: View {
   var body: some View {
     ZStack {
       ZStack {
-        HStack {
-          Text(viewModel.viewingText)
-            .onTapGesture {
-              beginEditing()
-            }
-        }
+        Text(viewModel.viewingText)
+          .onTapGesture {
+            beginEditing()
+          }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
         .opacity(isEditing ? 0 : 1)
         HStack {
           TextView<ViewModel>(text: $viewModel.text, delegate: delegate)

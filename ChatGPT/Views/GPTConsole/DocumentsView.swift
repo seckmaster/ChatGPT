@@ -165,9 +165,7 @@ extension DocumentsView {
     }
     
     @MainActor
-    func createNewDocumentIfNecessary() {
-      guard activeDocumentHistory.count == 2 else { return }
-      
+    func createNewDocument() {
       do {
         var document = Document(
           id: .init(), 
@@ -196,6 +194,7 @@ extension DocumentsView {
               model: "gpt-4"
             )
             document.title = response.messages.first?.content
+            document.lastModifiedAt = Date()
             try documentsStorage.store(document: document)
             loadDocuments()
           } catch {
@@ -243,6 +242,17 @@ extension DocumentsView {
       } catch {
         print("Storing a document failed with error:", error)
       }
+    }
+    
+    func storeActiveDocument(reload: Bool = true) {
+      var document = documents.first(where: { $0.id == activeDocumentId })!
+      document.lastModifiedAt = Date()
+      document.history = activeDocumentHistory
+      storeDocument(document, reload: reload)
+    }
+    
+    func updateActiveHistory() {
+      activeDocumentHistory = activeDocumentId.flatMap { id in documents.first(where: { $0.id == id }) }?.history ?? .default
     }
   }
 }
