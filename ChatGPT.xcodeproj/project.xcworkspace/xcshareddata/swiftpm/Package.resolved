@@ -17,6 +17,15 @@
         "revision" : "32e8d724467f8fe623624570367e3d50c5638e46",
         "version" : "1.5.2"
       }
+    },
+    {
+      "identity" : "swiftchain",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/seckmaster/Swiftchain",
+      "state" : {
+        "branch" : "main",
+        "revision" : "1edc08b8fbe0486df1d42322a88965527a1ee884"
+      }
     }
   ],
   "version" : 2

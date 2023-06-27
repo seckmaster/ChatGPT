@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EA8CFD542A49FC9400CD4136 /* Swiftchain in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD532A49FC9400CD4136 /* Swiftchain */; };
-		EA8CFD562A49FC9400CD4136 /* SwiftchainOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD552A49FC9400CD4136 /* SwiftchainOpenAI */; };
+		EA8CFD622A4B243200CD4136 /* Swiftchain in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD612A4B243200CD4136 /* Swiftchain */; };
+		EA8CFD642A4B243200CD4136 /* SwiftchainOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD632A4B243200CD4136 /* SwiftchainOpenAI */; };
 		EAF2C7AC2A3CC86800E34549 /* PDF2Embeddings.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF2C7AB2A3CC86800E34549 /* PDF2Embeddings.swift */; };
 		EAF94D152A31A87100A1B98A /* ChatGPTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */; };
 		EAF94D172A31A87100A1B98A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D162A31A87100A1B98A /* ContentView.swift */; };
@@ -28,7 +28,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EAF222CA2A49801800A203CA /* swiftchain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = swiftchain; path = ../swiftchain; sourceTree = "<group>"; };
 		EAF2C7AB2A3CC86800E34549 /* PDF2Embeddings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDF2Embeddings.swift; sourceTree = "<group>"; };
 		EAF94D112A31A87100A1B98A /* ChatGPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatGPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTApp.swift; sourceTree = "<group>"; };
@@ -54,8 +53,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EA8CFD562A49FC9400CD4136 /* SwiftchainOpenAI in Frameworks */,
-				EA8CFD542A49FC9400CD4136 /* Swiftchain in Frameworks */,
+				EA8CFD642A4B243200CD4136 /* SwiftchainOpenAI in Frameworks */,
+				EA8CFD622A4B243200CD4136 /* Swiftchain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,7 +71,6 @@
 		EAF94D082A31A87100A1B98A = {
 			isa = PBXGroup;
 			children = (
-				EAF222CA2A49801800A203CA /* swiftchain */,
 				EAF94D132A31A87100A1B98A /* ChatGPT */,
 				EAF94D122A31A87100A1B98A /* Products */,
 				EAF222CB2A49805900A203CA /* Frameworks */,
@@ -168,8 +166,8 @@
 			);
 			name = ChatGPT;
 			packageProductDependencies = (
-				EA8CFD532A49FC9400CD4136 /* Swiftchain */,
-				EA8CFD552A49FC9400CD4136 /* SwiftchainOpenAI */,
+				EA8CFD612A4B243200CD4136 /* Swiftchain */,
+				EA8CFD632A4B243200CD4136 /* SwiftchainOpenAI */,
 			);
 			productName = ChatGPT;
 			productReference = EAF94D112A31A87100A1B98A /* ChatGPT.app */;
@@ -200,6 +198,7 @@
 			);
 			mainGroup = EAF94D082A31A87100A1B98A;
 			packageReferences = (
+				EA8CFD602A4B243200CD4136 /* XCRemoteSwiftPackageReference "Swiftchain" */,
 			);
 			productRefGroup = EAF94D122A31A87100A1B98A /* Products */;
 			projectDirPath = "";
@@ -447,13 +446,26 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		EA8CFD602A4B243200CD4136 /* XCRemoteSwiftPackageReference "Swiftchain" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/seckmaster/Swiftchain";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
-		EA8CFD532A49FC9400CD4136 /* Swiftchain */ = {
+		EA8CFD612A4B243200CD4136 /* Swiftchain */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = EA8CFD602A4B243200CD4136 /* XCRemoteSwiftPackageReference "Swiftchain" */;
 			productName = Swiftchain;
 		};
-		EA8CFD552A49FC9400CD4136 /* SwiftchainOpenAI */ = {
+		EA8CFD632A4B243200CD4136 /* SwiftchainOpenAI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = EA8CFD602A4B243200CD4136 /* XCRemoteSwiftPackageReference "Swiftchain" */;
 			productName = SwiftchainOpenAI;
 		};
 /* End XCSwiftPackageProductDependency section */
