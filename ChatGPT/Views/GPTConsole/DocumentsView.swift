@@ -264,7 +264,7 @@ extension DocumentsView {
     func importConversationsFromChatGPT(data: Data) throws {
       struct Conversation: Decodable {
         let id: String
-        let title: String
+        let title: String?
         let createTime: Date
         let updateTime: Date
         let mapping: [String: Mapping]
@@ -285,7 +285,7 @@ extension DocumentsView {
       }
       struct Content: Decodable {
         let contentType: String
-        let parts: [String]
+        let parts: [String]?
       }
       let decoder = JSONDecoder()
       decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -302,11 +302,11 @@ extension DocumentsView {
         for conversation in conversations {
           let history: ChatOpenAILLM.Messages = conversation.mapping
             .compactMap { (id, message) -> (ChatOpenAILLM.Message, Date)? in
-              guard let author = message.message?.author, let content = message.message?.content, let createTime = message.message?.createTime else { return nil }
-              if content.parts.count > 1 {
+              guard let author = message.message?.author, let content = message.message?.content, let createTime = message.message?.createTime, let parts = content.parts else { return nil }
+              if parts.count > 1 {
                 print()
               }
-              var joinedContent = content.parts.joined()
+              var joinedContent = parts.joined()
               if joinedContent.isEmpty && author.role.lowercased() == "system" { 
                 joinedContent = defaultChatGPTPrompt
               }
