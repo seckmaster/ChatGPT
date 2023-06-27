@@ -72,7 +72,10 @@ struct TextView<ViewModel: EditingViewModel>: ViewRepresentable {
     
     let scroll = textView.contentOffset
     let attributedString = NSMutableAttributedString(text)
-    attributedString.setForegroundColor(to: .white, at: .init(location: 0, length: attributedString.length))
+    attributedString.setRichTextAttributes(
+      [.foregroundColor: UIColor.white], 
+      at: .init(location: 0, length: attributedString.length)
+    )
     let range = textView.selectedRange
     
     textView.delegate = nil
@@ -81,7 +84,7 @@ struct TextView<ViewModel: EditingViewModel>: ViewRepresentable {
     textView.setContentOffset(scroll, animated: false)
     textView.delegate = delegate
     delegate?.text = text
-    delegate?.view.value.viewModel.updateDocument()
+    delegate?.viewModel.updateDocument()
   }
 #endif
 }

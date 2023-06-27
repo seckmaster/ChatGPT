@@ -7,12 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EA8CFD542A49FC9400CD4136 /* Swiftchain in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD532A49FC9400CD4136 /* Swiftchain */; };
+		EA8CFD562A49FC9400CD4136 /* SwiftchainOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD552A49FC9400CD4136 /* SwiftchainOpenAI */; };
+		EAF2C7AC2A3CC86800E34549 /* PDF2Embeddings.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF2C7AB2A3CC86800E34549 /* PDF2Embeddings.swift */; };
 		EAF94D152A31A87100A1B98A /* ChatGPTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */; };
 		EAF94D172A31A87100A1B98A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D162A31A87100A1B98A /* ContentView.swift */; };
 		EAF94D192A31A87200A1B98A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EAF94D182A31A87200A1B98A /* Assets.xcassets */; };
 		EAF94D1C2A31A87200A1B98A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EAF94D1B2A31A87200A1B98A /* Preview Assets.xcassets */; };
-		EAF94D252A31A8D100A1B98A /* Swiftchain in Frameworks */ = {isa = PBXBuildFile; productRef = EAF94D242A31A8D100A1B98A /* Swiftchain */; };
-		EAF94D272A31A8D100A1B98A /* SwiftchainOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = EAF94D262A31A8D100A1B98A /* SwiftchainOpenAI */; };
 		EAF94D2A2A31A92C00A1B98A /* ConfigStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D292A31A92C00A1B98A /* ConfigStorage.swift */; };
 		EAF94D2D2A31A98F00A1B98A /* GPTConsole.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D2C2A31A98F00A1B98A /* GPTConsole.swift */; };
 		EAF94D2F2A31A9A800A1B98A /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D2E2A31A9A800A1B98A /* TextView.swift */; };
@@ -27,6 +28,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EAF222CA2A49801800A203CA /* swiftchain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = swiftchain; path = ../swiftchain; sourceTree = "<group>"; };
+		EAF2C7AB2A3CC86800E34549 /* PDF2Embeddings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDF2Embeddings.swift; sourceTree = "<group>"; };
 		EAF94D112A31A87100A1B98A /* ChatGPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatGPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTApp.swift; sourceTree = "<group>"; };
 		EAF94D162A31A87100A1B98A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -51,19 +54,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EAF94D272A31A8D100A1B98A /* SwiftchainOpenAI in Frameworks */,
-				EAF94D252A31A8D100A1B98A /* Swiftchain in Frameworks */,
+				EA8CFD562A49FC9400CD4136 /* SwiftchainOpenAI in Frameworks */,
+				EA8CFD542A49FC9400CD4136 /* Swiftchain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		EAF222CB2A49805900A203CA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		EAF94D082A31A87100A1B98A = {
 			isa = PBXGroup;
 			children = (
+				EAF222CA2A49801800A203CA /* swiftchain */,
 				EAF94D132A31A87100A1B98A /* ChatGPT */,
 				EAF94D122A31A87100A1B98A /* Products */,
+				EAF222CB2A49805900A203CA /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -123,6 +135,7 @@
 			children = (
 				EAF94D312A31A9CA00A1B98A /* Utils.swift */,
 				EAF94D332A31ABBF00A1B98A /* Color.swift */,
+				EAF2C7AB2A3CC86800E34549 /* PDF2Embeddings.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -155,8 +168,8 @@
 			);
 			name = ChatGPT;
 			packageProductDependencies = (
-				EAF94D242A31A8D100A1B98A /* Swiftchain */,
-				EAF94D262A31A8D100A1B98A /* SwiftchainOpenAI */,
+				EA8CFD532A49FC9400CD4136 /* Swiftchain */,
+				EA8CFD552A49FC9400CD4136 /* SwiftchainOpenAI */,
 			);
 			productName = ChatGPT;
 			productReference = EAF94D112A31A87100A1B98A /* ChatGPT.app */;
@@ -187,7 +200,6 @@
 			);
 			mainGroup = EAF94D082A31A87100A1B98A;
 			packageReferences = (
-				EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */,
 			);
 			productRefGroup = EAF94D122A31A87100A1B98A /* Products */;
 			projectDirPath = "";
@@ -228,6 +240,7 @@
 				EAF94D152A31A87100A1B98A /* ChatGPTApp.swift in Sources */,
 				EAF94D2F2A31A9A800A1B98A /* TextView.swift in Sources */,
 				EAF94D322A31A9CA00A1B98A /* Utils.swift in Sources */,
+				EAF2C7AC2A3CC86800E34549 /* PDF2Embeddings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -362,6 +375,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -369,8 +383,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tss.chatgpt.ChatGPT;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -389,6 +407,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -396,8 +415,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tss.chatgpt.ChatGPT;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};
@@ -424,26 +447,13 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/seckmaster/Swiftchain";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		EAF94D242A31A8D100A1B98A /* Swiftchain */ = {
+		EA8CFD532A49FC9400CD4136 /* Swiftchain */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */;
 			productName = Swiftchain;
 		};
-		EAF94D262A31A8D100A1B98A /* SwiftchainOpenAI */ = {
+		EA8CFD552A49FC9400CD4136 /* SwiftchainOpenAI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = EAF94D232A31A8D100A1B98A /* XCRemoteSwiftPackageReference "Swiftchain" */;
 			productName = SwiftchainOpenAI;
 		};
 /* End XCSwiftPackageProductDependency section */

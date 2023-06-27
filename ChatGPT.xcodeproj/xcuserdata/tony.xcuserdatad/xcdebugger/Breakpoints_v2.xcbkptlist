@@ -3,4 +3,114 @@
    uuid = "21190E30-FF27-4E19-AACA-D5A6584543B2"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "91DF615B-18DE-458F-94BD-740F79AB4F89"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../swiftchain/Sources/SwiftchainOpenAI/API.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "98"
+            endingLineNumber = "98"
+            landmarkName = "streamChat(model:temperature:variants:messages:functions:apiKey:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "91DF615B-18DE-458F-94BD-740F79AB4F89 - ab59c1a7ee196f77"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for closure #1 @Sendable (Foundation.Data) async throws -&gt; Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Variants&gt; in SwiftchainOpenAI.streamChat(model: Swift.String, temperature: Swift.Double, variants: Swift.Int, messages: Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Message&gt;, functions: Swift.Optional&lt;Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Function&gt;&gt;, apiKey: Swift.String) throws -&gt; Swift.AsyncSequence"
+                  moduleName = "ChatGPT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tony/swift/swiftchain/Sources/SwiftchainOpenAI/API.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "98"
+                  endingLineNumber = "98"
+                  offsetFromSymbolStart = "1012">
+               </Location>
+               <Location
+                  uuid = "91DF615B-18DE-458F-94BD-740F79AB4F89 - 57a65639728daa69"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Foundation.Data) throws -&gt; SwiftchainOpenAI.ChatOpenAILLM.Variants in closure #1 @Sendable (Foundation.Data) async throws -&gt; Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Variants&gt; in SwiftchainOpenAI.streamChat(model: Swift.String, temperature: Swift.Double, variants: Swift.Int, messages: Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Message&gt;, functions: Swift.Optional&lt;Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Function&gt;&gt;, apiKey: Swift.String) throws -&gt; Swift.AsyncSequence"
+                  moduleName = "ChatGPT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tony/swift/swiftchain/Sources/SwiftchainOpenAI/API.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "98"
+                  endingLineNumber = "98"
+                  offsetFromSymbolStart = "1756">
+               </Location>
+               <Location
+                  uuid = "91DF615B-18DE-458F-94BD-740F79AB4F89 - 57a65639728daa69"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Foundation.Data) throws -&gt; SwiftchainOpenAI.ChatOpenAILLM.Variants in closure #1 @Sendable (Foundation.Data) async throws -&gt; Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Variants&gt; in SwiftchainOpenAI.streamChat(model: Swift.String, temperature: Swift.Double, variants: Swift.Int, messages: Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Message&gt;, functions: Swift.Optional&lt;Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Function&gt;&gt;, apiKey: Swift.String) throws -&gt; Swift.AsyncSequence"
+                  moduleName = "ChatGPT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tony/swift/swiftchain/Sources/SwiftchainOpenAI/API.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "98"
+                  endingLineNumber = "98"
+                  offsetFromSymbolStart = "1788">
+               </Location>
+               <Location
+                  uuid = "91DF615B-18DE-458F-94BD-740F79AB4F89 - 57a65639728daa69"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Foundation.Data) throws -&gt; SwiftchainOpenAI.ChatOpenAILLM.Variants in closure #1 @Sendable (Foundation.Data) async throws -&gt; Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Variants&gt; in SwiftchainOpenAI.streamChat(model: Swift.String, temperature: Swift.Double, variants: Swift.Int, messages: Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Message&gt;, functions: Swift.Optional&lt;Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Function&gt;&gt;, apiKey: Swift.String) throws -&gt; Swift.AsyncSequence"
+                  moduleName = "ChatGPT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tony/swift/swiftchain/Sources/SwiftchainOpenAI/API.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "98"
+                  endingLineNumber = "98"
+                  offsetFromSymbolStart = "1764">
+               </Location>
+               <Location
+                  uuid = "91DF615B-18DE-458F-94BD-740F79AB4F89 - 57a65639728daa69"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Foundation.Data) throws -&gt; SwiftchainOpenAI.ChatOpenAILLM.Variants in closure #1 @Sendable (Foundation.Data) async throws -&gt; Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Variants&gt; in SwiftchainOpenAI.streamChat(model: Swift.String, temperature: Swift.Double, variants: Swift.Int, messages: Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Message&gt;, functions: Swift.Optional&lt;Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Function&gt;&gt;, apiKey: Swift.String) throws -&gt; Swift.AsyncSequence"
+                  moduleName = "ChatGPT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tony/swift/swiftchain/Sources/SwiftchainOpenAI/API.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "98"
+                  endingLineNumber = "98"
+                  offsetFromSymbolStart = "1796">
+               </Location>
+               <Location
+                  uuid = "91DF615B-18DE-458F-94BD-740F79AB4F89 - 3dac8e544881b436"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for closure #1 @Sendable (Foundation.Data) async throws -&gt; Swift.Array&lt;Any&gt; in SwiftchainOpenAI.streamChat(model: Swift.String, temperature: Swift.Double, variants: Swift.Int, messages: Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Message&gt;, functions: Swift.Optional&lt;Swift.Array&lt;SwiftchainOpenAI.ChatOpenAILLM.Function&gt;&gt;, apiKey: Swift.String) throws -&gt; Swift.AsyncSequence"
+                  moduleName = "ChatGPT"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tony/swift/swiftchain/Sources/SwiftchainOpenAI/API.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "98"
+                  endingLineNumber = "98"
+                  offsetFromSymbolStart = "1036">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

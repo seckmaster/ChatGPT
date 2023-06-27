@@ -111,7 +111,7 @@ extension GPTConsoleCell {
       var container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
-      self.text = AttributedString(message.message.content, attributes: container)
+      self.text = AttributedString(message.message.content!, attributes: container)
       self.viewingText = .init()
       Task { @MainActor in
         self.viewingText = await messageToAttributedString(message.message)

@@ -146,7 +146,7 @@ func chatToAttributedString(
       container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content)
+      substr = AttributedString(message.content!)
       substr.setAttributes(container)
       string.append(substr)
     case .assistant:
@@ -179,13 +179,13 @@ func chatToAttributedString(
         container = AttributeContainer()
         container.foregroundColor = .white
         container.font = .systemFont(ofSize: 14)
-        substr = AttributedString(message.content)
+        substr = AttributedString(message.content!)
         substr.setAttributes(container)
         string.append(substr)
       } else {
-        var lowerBound = message.content.startIndex
+        var lowerBound = message.content!.startIndex
         
-        for match in message.content.matches(of: regex) {
+        for match in message.content!.matches(of: regex) {
           do {
             let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
               .appending(path: "chat-gpt-tmp-code.\(match.1)")
@@ -203,7 +203,7 @@ func chatToAttributedString(
             container = AttributeContainer()
             container.foregroundColor = .white
             container.font = .systemFont(ofSize: 14)
-            substr = AttributedString(message.content[beforeRange])
+            substr = AttributedString(message.content![beforeRange])
             substr.setAttributes(container)
             string.append(substr)
             string.append(AttributedString(attributedString))
@@ -212,11 +212,11 @@ func chatToAttributedString(
             continue
           }
         }
-        if lowerBound < message.content.endIndex {
+        if lowerBound < message.content!.endIndex {
           container = AttributeContainer()
           container.foregroundColor = .white
           container.font = .systemFont(ofSize: 14)
-          substr = AttributedString(message.content[lowerBound..<message.content.endIndex])
+          substr = AttributedString(message.content![lowerBound..<message.content!.endIndex])
           substr.setAttributes(container)
           string.append(substr)
         }
@@ -232,10 +232,10 @@ func chatToAttributedString(
       container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content)
+      substr = AttributedString(message.content!)
       substr.setAttributes(container)
       string.append(substr)
-    case .custom("error"):
+    case .custom("error"), .custom("Error"):
       var container = AttributeContainer()
       container.foregroundColor = .orange
       container.font = .boldSystemFont(ofSize: 14)
@@ -246,7 +246,7 @@ func chatToAttributedString(
       container = AttributeContainer()
       container.foregroundColor = .red
       container.font = .systemFont(ofSize: 12)
-      substr = AttributedString(message.content)
+      substr = AttributedString(message.content!)
       substr.setAttributes(container)
       string.append(substr)
     case _:
@@ -271,6 +271,7 @@ func codeToHtml(code: String, url: URL) async throws -> String {
     return .init(filePath: "/opt/homebrew/bin/pygmentize")
   }
   
+#if os(macOS)
   if let html = lock.withLock({ syntaxHighlightingCache[code] }) {
     print("From cache ...")
     return html
@@ -292,6 +293,9 @@ func codeToHtml(code: String, url: URL) async throws -> String {
   lock.withLock {
     syntaxHighlightingCache[code] = html
   }
+#else
+  let html = code
+#endif
   return html
 }
 
@@ -301,6 +305,7 @@ func messageToAttributedString(
   await chatToAttributedString([message])
 }
 
+#if os(macOS)
 func executeCommand(
   executable: URL,
   arguments: [String] = []
@@ -344,3 +349,5 @@ func executeCommand(
   
   return output
 }
+#else
+#endif

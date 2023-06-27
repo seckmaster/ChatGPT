@@ -9,9 +9,15 @@ import Foundation
 import SwiftUI
 
 extension Color {
+  #if canImport(AppKit)
   init(color: NSColor) {
     self.init(nsColor: color)
   }
+  #else
+  init(color: UIColor) {
+    self.init(uiColor: color)
+  }
+  #endif
   
   static func rgb(red: Int, green: Int, blue: Int, opacity: Double = 1) -> Color {
     .init(

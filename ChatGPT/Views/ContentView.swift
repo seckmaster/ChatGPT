@@ -64,6 +64,7 @@ struct ContentView: View {
           ))
           apiKey = $0
         } catch {
+          apiKey = $0
           print("Could not store api key!")
         }
       }
@@ -71,6 +72,25 @@ struct ContentView: View {
     .onAppear {
       apiKey = try? ConfigStorage().config.apiKey
     }
+    .onDrop(
+      of: [.fileURL], 
+      isTargeted: nil
+    ) { providers, location in
+      providers[0].loadDataRepresentation(for: .pdf) { data, error in
+        guard let data, error == nil else {
+          return
+        }
+        Task {
+          try await dataToEmbedding(data)
+        }
+      }
+      return true
+    }
+    #if os(macOS)
+    .onExitCommand { 
+      exit(0)
+    }
+    #endif
   }
   
   @ViewBuilder func input(height: CGFloat) -> some View {
@@ -103,6 +123,7 @@ struct ContentView: View {
     .frame(height: min(300, max(120, height)))
     .background(Color.palette.background2)
     .cornerRadius(12)
+    #if os(macOS)
     .onKeyDown { event in
       let enterKeyCode: UInt16 = 36 // 'enter'
       let kKeyKode: UInt16 = 40     // 'k'
@@ -117,6 +138,7 @@ struct ContentView: View {
         break
       }
     }
+    #endif
   }
   
   @MainActor
@@ -134,25 +156,49 @@ struct ContentView: View {
     }
     let documentID = documentsViewModel.activeDocumentId! 
     
-    let editingText = editingText
-      .trimmingCharacters(in: .whitespacesAndNewlines)
+    let stream = true
+    
     do {
       isLoading = true
-      let content = editingText
       self.editingText = ""
-      let response = try await viewModel.callGPT(
-        content: content,
-        history: documentsViewModel.activeDocumentHistory
-      )
-      documentsViewModel.appendMessage(
-        .init(
-          role: .assistant, 
-          content: response ?? "<no response>"
-        ),
-        documentID: documentID
-      )
-      if documentID == documentsViewModel.activeDocumentId {
+      
+      if stream {
+        documentsViewModel.appendMessage(
+          .init(
+            role: .assistant, 
+            content: ""
+          ),
+          documentID: documentID
+        )
         documentsViewModel.updateActiveHistory()
+
+        for try await chunk in try viewModel.streamCallGPT(history: documentsViewModel.activeDocumentHistory) {
+          let messages = chunk as! [ChatOpenAILLM.Message]
+          for message in messages {
+            let index = documentsViewModel.documentIndex(documentID: documentID)
+            print(documentsViewModel.activeDocumentId!, documentID, documentsViewModel.documents[index].history.count)
+            documentsViewModel.documents[index].history[documentsViewModel.documents[index].history.count - 1].content!.append(message.content ?? "")
+            if documentID == documentsViewModel.activeDocumentId {
+              documentsViewModel.updateActiveHistory()
+            }
+          }
+        }
+        let index = documentsViewModel.documentIndex(documentID: documentID)
+        documentsViewModel.storeDocument(documentsViewModel.documents[index])
+      } else {
+        let response = try await viewModel.callGPT(
+          history: documentsViewModel.activeDocumentHistory
+        )
+        documentsViewModel.appendMessage(
+          .init(
+            role: .assistant, 
+            content: response ?? "<no response>"
+          ),
+          documentID: documentID
+        )
+        if documentID == documentsViewModel.activeDocumentId {
+          documentsViewModel.updateActiveHistory()
+        }
       }
     } catch {
       documentsViewModel.appendMessage(
@@ -188,7 +234,7 @@ extension ContentView {
       defaultModel: "gpt-4"
     )
     
-    func callGPT(content: String, history: ChatOpenAILLM.Messages) async throws -> String? {
+    func callGPT(history: ChatOpenAILLM.Messages) async throws -> String? {
       let response = try await llm.invoke(
         history.filter { $0.role.rawValue != "error" }, 
         temperature: 0.0, 
@@ -197,6 +243,15 @@ extension ContentView {
       )
       guard !response.messages.isEmpty else { return nil }
       return response.messages[0].content
+    }
+    
+    func streamCallGPT(history: ChatOpenAILLM.Messages) throws -> any AsyncSequence {
+      try llm.stream(
+        history.filter { $0.role.rawValue != "error" }, 
+        temperature: 0.0, 
+        numberOfVariants: 1, 
+        model: "gpt-4"
+      )
     }
   }
 }

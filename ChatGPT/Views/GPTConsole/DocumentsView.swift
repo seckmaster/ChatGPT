@@ -220,7 +220,7 @@ extension DocumentsView {
       _ message: ChatOpenAILLM.Message,
       documentID: Document.ID
     ) {
-      let index = documents.firstIndex(where: { $0.id == documentID })!
+      let index = documentIndex(documentID: documentID)
       documents[index].history.append(message)
       documents[index].lastModifiedAt = Date()
       storeDocument(documents[index])
@@ -252,7 +252,12 @@ extension DocumentsView {
     }
     
     func updateActiveHistory() {
-      activeDocumentHistory = activeDocumentId.flatMap { id in documents.first(where: { $0.id == id }) }?.history ?? .default
+      let activeDocument = activeDocumentId.flatMap { id in documents.first(where: { $0.id == id }) }
+      activeDocumentHistory = activeDocument?.history ?? .default
+    }
+    
+    func documentIndex(documentID: Document.ID) -> Int {
+      documents.firstIndex(where: { $0.id == documentID })!
     }
   }
 }

@@ -12,6 +12,7 @@ struct GPTConsole: View {
   @State var title: String?
 //  @State var messages: [GPTConsoleCell.Message] = []
   @Binding var history: ChatOpenAILLM.Messages
+//  var history: [ChatOpenAILLM.Message]()
   
   var didUpdateDocument: ((Int, String)?) -> Void
   
@@ -37,6 +38,9 @@ struct GPTConsole: View {
     }
   }
 }
+
+#if canImport(AppKit)
+import AppKit
 
 struct ObserveKeyEventsView: ViewRepresentable {
   class ObserveKeyView: NSView {
@@ -87,6 +91,7 @@ extension View {
     modifier(ObserveKeyEventsModifier(observer: observer))
   }
 }
+#endif
 
 let defaultChatGPTPrompt = """
 You are a helpful assistant. Respond to user's queries in an informative, professional and honest manner. Be as comprehensive as possible!
