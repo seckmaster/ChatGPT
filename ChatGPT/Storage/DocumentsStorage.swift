@@ -14,6 +14,7 @@ struct Document: Identifiable, Codable, Hashable {
   var history: [ChatOpenAILLM.Message]
   var createdAt: Date
   var lastModifiedAt: Date
+  var isImportedFromChatGPT: Bool? = false
   
   func hash(into hasher: inout Hasher) {
     hasher.combine(id)

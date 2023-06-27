@@ -21,6 +21,7 @@ struct ContentView: View {
       documentsViewModel.apiKey = apiKey
     }
   }
+  @State var showImportConversationView = false
   @ObservedObject var documentsViewModel: DocumentsView.ViewModel = .init()
   @ObservedObject var viewModel: ViewModel = .init()
   
@@ -74,11 +75,40 @@ struct ContentView: View {
     .onAppear {
       apiKey = try? ConfigStorage().config.apiKey
     }
+    .sheet(isPresented: $showImportConversationView) { 
+      HStack {
+        Spacer()
+        VStack {
+          Spacer()
+          Text("Beta")
+            .font(.body.italic())
+            .foregroundColor(.cyan)
+          Text("Drop `conversation.json` file")
+            .font(.body)
+            .foregroundColor(.white)
+          Spacer()
+        }
+        Spacer()
+      }
+      .frame(width: 300, height: 300, alignment: .center)
+      .onDrop(of: [.json], isTargeted: nil) { providers, location in
+        _ = providers[0].loadDataRepresentation(for: .json) { data, error in
+          guard let data, error == nil else {
+            return
+          }
+          Task { @MainActor in
+            try documentsViewModel.importConversationsFromChatGPT(data: data)
+            self.showImportConversationView = false
+          }
+        }
+        return true
+      }
+    }
     .onDrop(
       of: [.fileURL], 
       isTargeted: nil
     ) { providers, location in
-      providers[0].loadDataRepresentation(for: .pdf) { data, error in
+      _ = providers[0].loadDataRepresentation(for: .pdf) { data, error in
         guard let data, error == nil else {
           return
         }
@@ -93,6 +123,11 @@ struct ContentView: View {
       exit(0)
     }
     #endif
+    .toolbar { 
+      Button("Import conversation") { 
+        showImportConversationView = true
+      }
+    }
   }
   
   @ViewBuilder func input(height: CGFloat) -> some View {
@@ -107,7 +142,6 @@ struct ContentView: View {
         Spacer()
         VStack {
           Spacer()
-          
           LoadingButton(isLoading: $isLoading) { 
             Task {
               await callGPT()

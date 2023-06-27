@@ -259,6 +259,79 @@ extension DocumentsView {
     func documentIndex(documentID: Document.ID) -> Int {
       documents.firstIndex(where: { $0.id == documentID })!
     }
+    
+    func importConversationsFromChatGPT(data: Data) throws {
+      struct Conversation: Decodable {
+        let id: String
+        let title: String
+        let createTime: Date
+        let updateTime: Date
+        let mapping: [String: Mapping]
+      }
+      struct Mapping: Decodable {
+        let id: String
+        let message: Message?
+      }
+      struct Message: Decodable {
+        let id: String
+        let author: Author?
+        let content: Content?
+        let createTime: Date?
+        let updateTime: Date?
+      }
+      struct Author: Decodable {
+        let role: String
+      }
+      struct Content: Decodable {
+        let contentType: String
+        let parts: [String]
+      }
+      let decoder = JSONDecoder()
+      decoder.keyDecodingStrategy = .convertFromSnakeCase
+      decoder.dateDecodingStrategy = .secondsSince1970
+      
+      for document in documents {
+        if document.isImportedFromChatGPT == true {
+          try documentsStorage.delete(documentID: document.id)
+        }
+      }
+      
+      do {
+        let conversations = try decoder.decode([Conversation].self, from: data)
+        for conversation in conversations {
+          let history: ChatOpenAILLM.Messages = conversation.mapping
+            .compactMap { (id, message) -> (ChatOpenAILLM.Message, Date)? in
+              guard let author = message.message?.author, let content = message.message?.content, let createTime = message.message?.createTime else { return nil }
+              if content.parts.count > 1 {
+                print()
+              }
+              var joinedContent = content.parts.joined()
+              if joinedContent.isEmpty && author.role.lowercased() == "system" { 
+                joinedContent = defaultChatGPTPrompt
+              }
+              return (ChatOpenAILLM.Message(
+                role: .init(rawValue: author.role)!, 
+                content: joinedContent
+              ), createTime)
+            }
+            .sorted { $0.1 < $1.1 }
+            .map { $0.0 }
+          var document = Document(
+            id: .init(uuidString: conversation.id)!,
+            title: conversation.title, 
+            history: history, 
+            createdAt: conversation.createTime, 
+            lastModifiedAt: conversation.updateTime
+          )
+          document.isImportedFromChatGPT = true
+          storeDocument(document)
+        }
+        loadDocuments()
+      } catch {
+        print(error)
+        throw error
+      }
+    }
   }
 }
 

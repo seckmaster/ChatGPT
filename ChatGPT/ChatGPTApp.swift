@@ -13,5 +13,8 @@ struct ChatGPTApp: App {
     WindowGroup {
       ContentView()
     }
+    .windowResizability(.contentSize)
+    .windowStyle(.titleBar)
+    .windowToolbarStyle(.unified(showsTitle: true))
   }
 }
