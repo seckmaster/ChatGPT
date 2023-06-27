@@ -185,7 +185,7 @@ extension DocumentsView {
                   content: """
                   Provide a short title for a document. The document starts with the following user query: 
                   
-                  User query: \(activeDocumentHistory[1].content)
+                  User query: \(activeDocumentHistory[1].content ?? "<no content>")
                   """
                 )
               ], 
