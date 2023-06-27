@@ -245,7 +245,7 @@ extension DocumentsView {
     }
     
     func storeActiveDocument(reload: Bool = true) {
-      var document = documents.first(where: { $0.id == activeDocumentId })!
+      guard var document = documents.first(where: { $0.id == activeDocumentId }) else { return }
       document.lastModifiedAt = Date()
       document.history = activeDocumentHistory
       storeDocument(document, reload: reload)
