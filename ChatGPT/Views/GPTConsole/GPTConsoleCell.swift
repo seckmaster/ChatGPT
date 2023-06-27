@@ -113,9 +113,10 @@ extension GPTConsoleCell {
       container.font = .systemFont(ofSize: 14)
       self.text = AttributedString(message.message.content!, attributes: container)
       self.viewingText = .init()
-      Task { @MainActor in
-        self.viewingText = await messageToAttributedString(message.message)
-      }
+//      Task { @MainActor in
+//        self.viewingText = await messageToAttributedString(message.message)
+//      }
+      self.viewingText = messageToAttributedString(message.message)
     }
     
     func updateDocument() {
@@ -127,9 +128,11 @@ extension GPTConsoleCell {
         role: message.message.role,
         content: .init(text.characters[...])
       )
-      Task {
-        viewingText = await messageToAttributedString(message.message)
-      }
+//      Task {
+//        viewingText = await messageToAttributedString(message.message)
+//      }
+
+      self.viewingText = messageToAttributedString(message.message)
     }
   }
 }

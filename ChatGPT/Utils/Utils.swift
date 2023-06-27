@@ -14,71 +14,6 @@ let lock = NSLock()
 var syntaxHighlightingCache = [String: String]()
 var cachedPygmentsExecutableURL: URL?
 
-func parseMarkdown(
-  _ markdown: String,
-  allowsExtendedAttributes: Bool = false,
-  interpretedSyntax: AttributedString.MarkdownParsingOptions.InterpretedSyntax = .inlineOnlyPreservingWhitespace,
-  failurePolicy: AttributedString.MarkdownParsingOptions.FailurePolicy = .returnPartiallyParsedIfPossible,
-  primaryForegroundColor: Color? = nil
-) -> AttributedString {
-  do {
-    var attributedString = try AttributedString(
-      markdown: markdown, 
-      options: .init(
-        allowsExtendedAttributes: allowsExtendedAttributes, 
-        interpretedSyntax: interpretedSyntax, 
-        failurePolicy: failurePolicy
-      )
-    )
-    
-    var globalContainer = AttributeContainer()
-    globalContainer.font = .systemFont(ofSize: 14)
-    if let color = primaryForegroundColor {
-      globalContainer.foregroundColor = color
-    }
-    attributedString.mergeAttributes(globalContainer, mergePolicy: .keepNew)
-    
-    markdown.ranges(of: /###(.+?)\n/).forEach {
-      let range1 = attributedString.range(of: markdown[$0])!
-      let range2 = attributedString.range(of: markdown[$0].dropFirst(4))!
-      var container = AttributeContainer()
-      container.font = .heading3
-      attributedString.replaceSubrange(
-        range1, 
-        with: attributedString[range2].settingAttributes(container)
-      )
-    }
-    markdown.ranges(of: /##(.+?)\n/).forEach {
-      guard let range1 = attributedString.range(of: markdown[$0]) else { return } 
-      let range2 = attributedString.range(of: markdown[$0].dropFirst(3))!
-      var container = AttributeContainer()
-      container.font = .heading2
-      attributedString.replaceSubrange(
-        range1, 
-        with: attributedString[range2].settingAttributes(container)
-      )
-    }
-    markdown.ranges(of: /#(.+?)\n/).forEach {
-      guard let range1 = attributedString.range(of: markdown[$0]) else { return } 
-      let range2 = attributedString.range(of: markdown[$0].dropFirst(2))!
-      var container = AttributeContainer()
-      container.font = .heading1
-      //      let paragraphStyle = NSMutableParagraphStyle()
-      //      paragraphStyle.paragraphSpacing = 40
-      //      paragraphStyle.lineSpacing = 40
-      //      paragraphStyle.headIndent = 100
-      //      container.paragraphStyle = paragraphStyle
-      attributedString.replaceSubrange(
-        range1, 
-        with: attributedString[range2].settingAttributes(container)
-      )
-    }
-    return attributedString
-  } catch {
-    return .init(markdown)
-  }
-}
-
 extension NSFont {
   var isHeading1: Bool {
     self.pointSize == NSFont.heading1.pointSize
@@ -129,7 +64,7 @@ extension NSFont {
   }
 }
 
-func chatToAttributedString(
+func chatToAttributedStringAsync(
   _ chat: [ChatOpenAILLM.Message]
 ) async -> AttributedString {
   var string = AttributedString()
@@ -256,6 +191,75 @@ func chatToAttributedString(
   return string
 }
 
+func chatToAttributedString(
+  _ chat: [ChatOpenAILLM.Message]
+) -> AttributedString {
+  var string = AttributedString()
+  for message in chat {
+    switch message.role {
+    case .system:
+      var container = AttributeContainer()
+      container.foregroundColor = .red
+      container.font = .boldSystemFont(ofSize: 14)
+      var substr = AttributedString("⦿  System\n\n")
+      substr.setAttributes(container)
+      string.append(substr)
+      
+      container = AttributeContainer()
+      container.foregroundColor = .white
+      container.font = .systemFont(ofSize: 14)
+      substr = AttributedString(message.content!)
+      substr.setAttributes(container)
+      string.append(substr)
+    case .assistant:
+      var container = AttributeContainer()
+      container.foregroundColor = .orange
+      container.font = .boldSystemFont(ofSize: 14)
+      var substr = AttributedString("⦿  Assistant\n\n")
+      substr.setAttributes(container)
+      string.append(substr)
+      container = AttributeContainer()
+      container.foregroundColor = .white
+      container.font = .systemFont(ofSize: 14)
+      substr = AttributedString(message.content!)
+      substr.setAttributes(container)
+      string.append(substr)
+    case .user:
+      var container = AttributeContainer()
+      container.foregroundColor = .magenta
+      container.font = .boldSystemFont(ofSize: 14)
+      var substr = AttributedString("⦿  User\n\n")
+      substr.setAttributes(container)
+      string.append(substr)
+      
+      container = AttributeContainer()
+      container.foregroundColor = .white
+      container.font = .systemFont(ofSize: 14)
+      substr = AttributedString(message.content!)
+      substr.setAttributes(container)
+      string.append(substr)
+    case .custom("error"), .custom("Error"):
+      var container = AttributeContainer()
+      container.foregroundColor = .orange
+      container.font = .boldSystemFont(ofSize: 14)
+      var substr = AttributedString("⦿  Error\n\n")
+      substr.setAttributes(container)
+      string.append(substr)
+      
+      container = AttributeContainer()
+      container.foregroundColor = .red
+      container.font = .systemFont(ofSize: 12)
+      substr = AttributedString(message.content!)
+      substr.setAttributes(container)
+      string.append(substr)
+    case _:
+      fatalError()
+    }
+  }
+  return string
+}
+
+
 func codeToHtml(code: String, url: URL) async throws -> String {
   func fetchPygmentsExecutableURL() async throws -> URL {
 //    if let url = lock.withLock({ cachedPygmentsExecutableURL }) { return url }
@@ -299,10 +303,16 @@ func codeToHtml(code: String, url: URL) async throws -> String {
   return html
 }
 
-func messageToAttributedString(
+func messageToAttributedStringAsync(
   _ message: ChatOpenAILLM.Message
 ) async -> AttributedString {
-  await chatToAttributedString([message])
+  await chatToAttributedStringAsync([message])
+}
+
+func messageToAttributedString(
+  _ message: ChatOpenAILLM.Message
+) -> AttributedString {
+  chatToAttributedString([message])
 }
 
 #if os(macOS)
