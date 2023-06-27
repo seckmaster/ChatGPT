@@ -42,9 +42,11 @@ struct ContentView: View {
                       role: documentsViewModel.activeDocumentHistory[index].role, 
                       content: text
                     )
-                    documentsViewModel.updateActiveHistory()
+                    if documentsViewModel.activeDocumentId == nil {
+                    } else {
+                      documentsViewModel.storeActiveDocument(reload: true)
+                    }
                   }
-                  documentsViewModel.storeActiveDocument()
                 }
               )
               input(height: proxy.size.height * 0.3 - 40)
