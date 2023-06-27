@@ -191,74 +191,68 @@ func chatToAttributedStringAsync(
   return string
 }
 
-func chatToAttributedString(
-  _ chat: [ChatOpenAILLM.Message]
-) -> AttributedString {
-  var string = AttributedString()
-  for message in chat {
-    switch message.role {
-    case .system:
-      var container = AttributeContainer()
-      container.foregroundColor = .red
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  System\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      
-      container = AttributeContainer()
-      container.foregroundColor = .white
-      container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content!)
-      substr.setAttributes(container)
-      string.append(substr)
-    case .assistant:
-      var container = AttributeContainer()
-      container.foregroundColor = .orange
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  Assistant\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      container = AttributeContainer()
-      container.foregroundColor = .white
-      container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content!)
-      substr.setAttributes(container)
-      string.append(substr)
-    case .user:
-      var container = AttributeContainer()
-      container.foregroundColor = .magenta
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  User\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      
-      container = AttributeContainer()
-      container.foregroundColor = .white
-      container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content!)
-      substr.setAttributes(container)
-      string.append(substr)
-    case .custom("error"), .custom("Error"):
-      var container = AttributeContainer()
-      container.foregroundColor = .orange
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  Error\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      
-      container = AttributeContainer()
-      container.foregroundColor = .red
-      container.font = .systemFont(ofSize: 12)
-      substr = AttributedString(message.content!)
-      substr.setAttributes(container)
-      string.append(substr)
-    case _:
-      fatalError()
-    }
-  }
-  return string
+func messageToAttributedStringAsync(
+  _ message: ChatOpenAILLM.Message
+) async -> AttributedString {
+  await chatToAttributedStringAsync([message])
 }
 
+func messageToAttributedString(
+  _ message: ChatOpenAILLM.Message
+) -> AttributedString {
+  func format(
+    message: ChatOpenAILLM.Message,
+    color: Color,
+    header: String,
+    prefix: String = "⦿  "
+  ) -> AttributedString {
+    var string = AttributedString()
+    
+    var container = AttributeContainer()
+    container.foregroundColor = color
+    container.font = .boldSystemFont(ofSize: 14)
+    var substr = AttributedString(prefix + header + "\n\n")
+    substr.setAttributes(container)
+    string.append(substr)
+    
+    container = AttributeContainer()
+    container.foregroundColor = .white
+    container.font = .systemFont(ofSize: 14)
+    substr = AttributedString(message.content!)
+    substr.setAttributes(container)
+    string.append(substr)
+    return string
+  }
+  
+  switch message.role {
+  case .system:
+    return format(
+      message: message,
+      color: .red, 
+      header: "System"
+    )
+  case .assistant:
+    return format(
+      message: message,
+      color: .purple, 
+      header: "Assistant"
+    )
+  case .user:
+    return format(
+      message: message,
+      color: .cyan, 
+      header: "User"
+    )
+  case .custom("error"), .custom("Error"):
+    return format(
+      message: message,
+      color: .orange, 
+      header: "Error"
+    )
+  case _:
+    fatalError()
+  }
+}
 
 func codeToHtml(code: String, url: URL) async throws -> String {
   func fetchPygmentsExecutableURL() async throws -> URL {
@@ -301,18 +295,6 @@ func codeToHtml(code: String, url: URL) async throws -> String {
   let html = code
 #endif
   return html
-}
-
-func messageToAttributedStringAsync(
-  _ message: ChatOpenAILLM.Message
-) async -> AttributedString {
-  await chatToAttributedStringAsync([message])
-}
-
-func messageToAttributedString(
-  _ message: ChatOpenAILLM.Message
-) -> AttributedString {
-  chatToAttributedString([message])
 }
 
 #if os(macOS)
