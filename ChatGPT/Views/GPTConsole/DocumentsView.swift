@@ -291,11 +291,11 @@ extension DocumentsView {
       decoder.keyDecodingStrategy = .convertFromSnakeCase
       decoder.dateDecodingStrategy = .secondsSince1970
       
-      for document in documents {
-        if document.isImportedFromChatGPT == true {
-          try documentsStorage.delete(documentID: document.id)
-        }
-      }
+//      for document in documents {
+//        if document.isImportedFromChatGPT == true {
+//          try documentsStorage.delete(documentID: document.id)
+//        }
+//      }
       
       do {
         let conversations = try decoder.decode([Conversation].self, from: data)
