@@ -178,14 +178,15 @@ extension DocumentsView {
         activeDocumentId = document.id
         Task { @MainActor in
           do {
+            let message = activeDocumentHistory[1].content ?? "<no content>"
             let response = try await llm.invoke(
               [
                 .init(
                   role: .user, 
                   content: """
-                  Provide a short title for a document. The document starts with the following user query: 
+                  Provide a short title for a conversation. Do not wrap the title in quotes. The conversation starts with the following message from the user: 
                   
-                  User query: \((activeDocumentHistory[1].content ?? "<no content>"))
+                  User message: \(message)
                   """
                 )
               ], 
