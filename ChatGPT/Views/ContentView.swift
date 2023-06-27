@@ -185,6 +185,7 @@ struct ContentView: View {
       role: .user, 
       content: editingText.trimmingCharacters(in: .whitespacesAndNewlines)
     ))
+    
     if documentsViewModel.activeDocumentId == nil {
       documentsViewModel.createNewDocument()
     } else {
@@ -212,7 +213,6 @@ struct ContentView: View {
           let messages = chunk as! [ChatOpenAILLM.Message]
           for message in messages {
             let index = documentsViewModel.documentIndex(documentID: documentID)
-            print(documentsViewModel.activeDocumentId!, documentID, documentsViewModel.documents[index].history.count)
             documentsViewModel.documents[index].history[documentsViewModel.documents[index].history.count - 1].content!.append(message.content ?? "")
             if documentID == documentsViewModel.activeDocumentId {
               documentsViewModel.updateActiveHistory()

@@ -167,7 +167,7 @@ extension DocumentsView {
     @MainActor
     func createNewDocument() {
       do {
-        var document = Document(
+        let document = Document(
           id: .init(), 
           history: activeDocumentHistory, 
           createdAt: .init(), 
@@ -185,7 +185,7 @@ extension DocumentsView {
                   content: """
                   Provide a short title for a document. The document starts with the following user query: 
                   
-                  User query: \(activeDocumentHistory[1].content ?? "<no content>")
+                  User query: \((activeDocumentHistory[1].content ?? "<no content>"))
                   """
                 )
               ], 
@@ -193,7 +193,8 @@ extension DocumentsView {
               numberOfVariants: 1, 
               model: "gpt-4"
             )
-            document.title = response.messages.first?.content
+            guard var document = documents.first(where: { $0.id == document.id }) else { return }
+            document.title = response.messages.first?.content ?? "New document"
             document.lastModifiedAt = Date()
             try documentsStorage.store(document: document)
             loadDocuments()
