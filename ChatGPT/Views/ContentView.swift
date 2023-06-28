@@ -10,7 +10,6 @@ import SwiftchainOpenAI
 import RegexBuilder
 
 struct ContentView: View {
-//  @State var isShowingDocumentsView = true
   @State var editingText: String = ""
   @State var isLoading: Bool = false
   @State var showEnterApiKey = false
@@ -21,6 +20,7 @@ struct ContentView: View {
       documentsViewModel.apiKey = apiKey
     }
   }
+  @State var showSettingsPanel = false
   @State var showImportConversationView = false
   @ObservedObject var documentsViewModel: DocumentsView.ViewModel = .init()
   @ObservedObject var viewModel: ViewModel = .init()
@@ -28,10 +28,8 @@ struct ContentView: View {
   var body: some View {
     VStack {
       HStack(spacing: 20) {
-//        if isShowingDocumentsView {
         DocumentsView(viewModel: documentsViewModel)
           .frame(maxWidth: 350)
-//        }
         if apiKey != nil {
           GeometryReader { proxy in
             VStack {
@@ -55,6 +53,15 @@ struct ContentView: View {
           }
           .padding(.all, 10)
           .background(Color.palette.background1)
+        }
+        if showSettingsPanel {
+          SettingsPanel(
+            temperature: $viewModel.temperature,
+            model: $viewModel.model,
+            stream: $viewModel.stream,
+            enableSyntaxHighlight: $viewModel.enableSyntaxHighlighting
+          )
+          .frame(maxWidth: 350)
         }
       }
     }
@@ -124,6 +131,14 @@ struct ContentView: View {
     }
     #endif
     .toolbar { 
+      Button {
+        print("expand")
+        showSettingsPanel.toggle()
+      } label: {
+        Image(systemName: showSettingsPanel ? "forward.frame" : "backward.frame.fill")
+      }
+    }
+    .toolbar { 
       Button("Import conversation") { 
         showImportConversationView = true
       }
@@ -179,7 +194,8 @@ struct ContentView: View {
   
   @MainActor
   func callGPT() async { // TODO: - Move this business logic into the ViewModel
-    guard !editingText.isEmpty else { return }
+    guard !editingText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+    guard viewModel.model.modelIdentifier != nil else { return } 
     
     documentsViewModel.activeDocumentHistory.append(.init(
       role: .user, 
@@ -193,13 +209,11 @@ struct ContentView: View {
     }
     let documentID = documentsViewModel.activeDocumentId! 
     
-    let stream = true
-    
     do {
       isLoading = true
       self.editingText = ""
       
-      if stream {
+      if viewModel.stream {
         documentsViewModel.appendMessage(
           .init(
             role: .assistant, 
@@ -254,28 +268,23 @@ struct ContentView: View {
 
 extension ContentView {
   class ViewModel: ObservableObject {
+    @Published var temperature: Double = 0.3
+    @Published var model: SettingsPanel.Model = .gpt4
+    @Published var stream: Bool = true
+    @Published var enableSyntaxHighlighting: Bool = true
+    
     var apiKey: String? {
       didSet {
-        llm = .init(
-          apiKey: apiKey,
-          defaultTemperature: 0.3, 
-          defaultNumberOfVariants: 1, 
-          defaultModel: "gpt-4"
-        )
+        llm = .init(apiKey: apiKey, defaultModel: "gpt-4")
       }
     }
-    private var llm: ChatOpenAILLM = .init(
-      defaultTemperature: 0.3, 
-      defaultNumberOfVariants: 1, 
-      defaultModel: "gpt-4"
-    )
+    private var llm: ChatOpenAILLM!
     
     func callGPT(history: ChatOpenAILLM.Messages) async throws -> String? {
       let response = try await llm.invoke(
-        history.filter { $0.role.rawValue != "error" }, 
-        temperature: 0.0, 
-        numberOfVariants: 1, 
-        model: "gpt-4"
+        history.filter { $0.role.rawValue.lowercased() != "error" }, 
+        temperature: temperature, 
+        model: model.modelIdentifier!
       )
       guard !response.messages.isEmpty else { return nil }
       return response.messages[0].content
@@ -283,11 +292,23 @@ extension ContentView {
     
     func streamCallGPT(history: ChatOpenAILLM.Messages) throws -> any AsyncSequence {
       try llm.stream(
-        history.filter { $0.role.rawValue != "error" }, 
-        temperature: 0.0, 
-        numberOfVariants: 1, 
-        model: "gpt-4"
+        history.filter { $0.role.rawValue.lowercased() != "error" }, 
+        temperature: temperature, 
+        model: model.modelIdentifier!
       )
+    }
+  }
+}
+
+extension SettingsPanel.Model {
+  var modelIdentifier: String? {
+    switch self {
+    case .gpt3:
+      return "gpt-3.5-turbo"
+    case .gpt4:
+      return "gpt-4"
+    case .custom(let model):
+      return model.isEmpty ? nil : model
     }
   }
 }

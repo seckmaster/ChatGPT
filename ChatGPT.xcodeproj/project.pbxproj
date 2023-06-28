@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		EA8CFD622A4B243200CD4136 /* Swiftchain in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD612A4B243200CD4136 /* Swiftchain */; };
 		EA8CFD642A4B243200CD4136 /* SwiftchainOpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = EA8CFD632A4B243200CD4136 /* SwiftchainOpenAI */; };
+		EA8CFD662A4C0FE700CD4136 /* SettingsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8CFD652A4C0FE700CD4136 /* SettingsPanel.swift */; };
 		EAF2C7AC2A3CC86800E34549 /* PDF2Embeddings.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF2C7AB2A3CC86800E34549 /* PDF2Embeddings.swift */; };
 		EAF94D152A31A87100A1B98A /* ChatGPTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */; };
 		EAF94D172A31A87100A1B98A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF94D162A31A87100A1B98A /* ContentView.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EA8CFD652A4C0FE700CD4136 /* SettingsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPanel.swift; sourceTree = "<group>"; };
 		EAF2C7AB2A3CC86800E34549 /* PDF2Embeddings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDF2Embeddings.swift; sourceTree = "<group>"; };
 		EAF94D112A31A87100A1B98A /* ChatGPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatGPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTApp.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 				EAF94D372A31AE8200A1B98A /* ApiKeyView.swift */,
 				EAF94D162A31A87100A1B98A /* ContentView.swift */,
 				EAF94D352A31ABFB00A1B98A /* LoadingButton.swift */,
+				EA8CFD652A4C0FE700CD4136 /* SettingsPanel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -237,6 +240,7 @@
 				EAF94D2A2A31A92C00A1B98A /* ConfigStorage.swift in Sources */,
 				EAF94D3F2A31CCDC00A1B98A /* DocumentsStorage.swift in Sources */,
 				EAF94D152A31A87100A1B98A /* ChatGPTApp.swift in Sources */,
+				EA8CFD662A4C0FE700CD4136 /* SettingsPanel.swift in Sources */,
 				EAF94D2F2A31A9A800A1B98A /* TextView.swift in Sources */,
 				EAF94D322A31A9CA00A1B98A /* Utils.swift in Sources */,
 				EAF2C7AC2A3CC86800E34549 /* PDF2Embeddings.swift in Sources */,
