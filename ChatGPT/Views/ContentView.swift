@@ -212,7 +212,7 @@ struct ContentView: View {
         for try await chunk in try viewModel.streamCallGPT(
           history: documentsViewModel.activeDocumentHistory
             .enumerated()
-            .filter({ $0.offset > documentsViewModel.activeDocumentHistory.count - 10 })
+            .filter({ $0.offset >= documentsViewModel.activeDocumentHistory.count - 10 })
             .map({ $0.element })
         ) {
           let messages = chunk as! [ChatOpenAILLM.Message]
