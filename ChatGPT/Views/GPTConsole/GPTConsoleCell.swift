@@ -12,17 +12,22 @@ import SwiftchainOpenAI
 struct GPTConsoleCell: View {
   @ObservedObject var viewModel: ViewModel
   @State var background: Color = Color.palette.background1
-  @State var isEditing = false
   @State var isHovering = false
   @State var delegate: TextViewDelegate<ViewModel>!
+  private var isEditing: Bool
   var didStopEditing: (String) -> Void
+  var requestStartEdit: () -> Void
   
   init(
     message: Message, 
-    didStopEditing: @escaping (String) -> Void
+    isEditing: Bool,
+    didStopEditing: @escaping (String) -> Void,
+    requestStartEdit: @escaping () -> Void
   ) {
     self.viewModel = .init(message: message)
+    self.isEditing = isEditing
     self.didStopEditing = didStopEditing
+    self.requestStartEdit = requestStartEdit
   }
   
   var body: some View {
@@ -54,7 +59,6 @@ struct GPTConsoleCell: View {
           if isEditing {
             Button {
               viewModel.updateText()
-              isEditing = false
               didStopEditing(.init(viewModel.text.characters))
             } label: {
               Image(systemName: "checkmark.rectangle.fill")
@@ -79,11 +83,16 @@ struct GPTConsoleCell: View {
         }
       }
     }
+    .onChange(of: isEditing) { isEditing in
+      if !isEditing {
+        didStopEditing(.init(viewModel.text.characters))
+      }
+    }
   }
   
   func beginEditing() {
     delegate = .init(viewModel: viewModel)
-    isEditing = true
+    requestStartEdit()
   }
 }
 

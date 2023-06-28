@@ -10,6 +10,7 @@ import SwiftchainOpenAI
 
 struct GPTConsole: View {
   @State var title: String?
+  @State var editingCellIndex: Int?
   @Binding var history: ChatOpenAILLM.Messages
   
   var didUpdateDocument: ((Int, String)?) -> Void
@@ -26,9 +27,19 @@ struct GPTConsole: View {
     ScrollViewReader { proxy in
       List {
         ForEach(Array(zip(history.indices, history)), id: \.0) { offset, message in
-          GPTConsoleCell(message: .init(id: offset, message: message)) { updatedText in
-            didUpdateDocument((offset, updatedText))
-          }
+          GPTConsoleCell(
+            message: .init(id: offset, message: message), 
+            isEditing: offset == editingCellIndex,
+            didStopEditing: { updatedText in
+              didUpdateDocument((offset, updatedText))
+              editingCellIndex = nil
+            }, 
+            requestStartEdit: {
+              editingCellIndex = offset
+              history.append(.init(role: .assistant, content: nil))
+              history.removeLast()
+            }
+          )
           .id(offset)
         }
         .onDelete { indexSet in
@@ -38,6 +49,7 @@ struct GPTConsole: View {
       }
       .onChange(of: history) { _ in
         proxy.scrollTo(history.indices.last!)
+        editingCellIndex = nil
       }
     }
   }
