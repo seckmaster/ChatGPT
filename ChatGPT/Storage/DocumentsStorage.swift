@@ -27,12 +27,6 @@ struct Document: Identifiable, Codable, Hashable {
 }
 
 struct DocumentsStorage {
-  init() {
-    if !FileManager.default.fileExists(atPath: url.absoluteString, isDirectory: nil) {
-      try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: false)
-    }
-  }
-  
   func documents() throws -> [Document] {
     let ids = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
     let documents = try ids.map { try loadDocument(from: $0) }

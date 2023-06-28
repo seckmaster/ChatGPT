@@ -12,6 +12,15 @@ struct ConfigStorage {
     let apiKey: String
   }
   
+  init() {
+    var sb: stat = .init()
+    let path = FileManager.default.appStorageURL.path().removingPercentEncoding!
+    if stat(path, &sb) != 0 {
+      mkdir(path, 0777)
+    } else {
+    }
+  }
+  
   var config: Config {
     get throws {
       let data = try Data(contentsOf: url)
