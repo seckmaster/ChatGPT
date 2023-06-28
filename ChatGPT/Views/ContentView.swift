@@ -143,6 +143,7 @@ struct ContentView: View {
         showImportConversationView = true
       }
     }
+    .preferredColorScheme(.dark)
   }
   
   @ViewBuilder func input(height: CGFloat) -> some View {
