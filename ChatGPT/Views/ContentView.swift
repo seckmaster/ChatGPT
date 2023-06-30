@@ -225,10 +225,7 @@ struct ContentView: View {
         documentsViewModel.updateActiveHistory()
 
         for try await chunk in try viewModel.streamCallGPT(
-          history: documentsViewModel.activeDocumentHistory
-            .enumerated()
-            .filter({ $0.offset >= documentsViewModel.activeDocumentHistory.count - 10 })
-            .map({ $0.element })
+            history: documentsViewModel.activeDocumentHistory.suffix(10)
         ) {
           let messages = chunk as! [ChatOpenAILLM.Message]
           for message in messages {
@@ -295,8 +292,7 @@ extension ContentView {
       guard !response.messages.isEmpty else { return nil }
       return response.messages[0].content
     }
-    
-    func streamCallGPT(history: ChatOpenAILLM.Messages) throws -> any AsyncSequence {
+  func streamCallGPT<C: Collection<ChatOpenAILLM.Message>>(history: C) throws -> any AsyncSequence {
       try llm.stream(
         history.filter { $0.role.rawValue.lowercased() != "error" }, 
         temperature: temperature, 
