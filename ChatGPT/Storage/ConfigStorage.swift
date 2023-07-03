@@ -13,11 +13,10 @@ struct ConfigStorage {
   }
   
   init() {
-    var sb: stat = .init()
     let path = FileManager.default.appStorageURL.path().removingPercentEncoding!
-    if stat(path, &sb) != 0 {
-      mkdir(path, 0777)
-    } else {
+    if !FileManager.default.fileExists(atPath: path) {
+      try! FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: false)
+      try! FileManager.default.createDirectory(atPath: path+"/documents", withIntermediateDirectories: false)
     }
   }
   

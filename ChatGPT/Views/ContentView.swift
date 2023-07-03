@@ -35,6 +35,8 @@ struct ContentView: View {
             VStack {
               GPTConsole(
                 history: $documentsViewModel.activeDocumentHistory,
+                isSyntaxHighlightingEnabled: $viewModel.enableSyntaxHighlighting,
+                isStreamingText: $isLoading,
                 didUpdateDocument: { updatedMessage in
                   if let (index, text) = updatedMessage {
                     documentsViewModel.activeDocumentHistory[index] = .init(
@@ -193,6 +195,7 @@ struct ContentView: View {
     #endif
   }
   
+  // TODO: - Refactor this function
   @MainActor
   func callGPT() async { // TODO: - Move this business logic into the ViewModel
     guard !editingText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
@@ -291,7 +294,7 @@ extension ContentView {
       return response.messages[0].content
     }
     
-    func streamCallGPT(history: ChatOpenAILLM.Messages) throws -> any AsyncSequence {
+    func streamCallGPT<C: Collection<ChatOpenAILLM.Message>>(history: C) throws -> any AsyncSequence {
       try llm.stream(
         history.filter { $0.role.rawValue.lowercased() != "error" }, 
         temperature: temperature, 

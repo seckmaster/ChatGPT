@@ -12,14 +12,20 @@ struct GPTConsole: View {
   @State var title: String?
   @State var editingCellIndex: Int?
   @Binding var history: ChatOpenAILLM.Messages
+  @Binding var isSyntaxHighlightingEnabled: Bool
+  @Binding var isStreamingText: Bool
   
   var didUpdateDocument: ((Int, String)?) -> Void
   
   init(
     history: Binding<ChatOpenAILLM.Messages>,
+    isSyntaxHighlightingEnabled: Binding<Bool>,
+    isStreamingText: Binding<Bool>,
     didUpdateDocument: @escaping ((Int, String)?) -> Void
   ) {
     self._history = history
+    self._isSyntaxHighlightingEnabled = isSyntaxHighlightingEnabled
+    self._isStreamingText = isStreamingText
     self.didUpdateDocument = didUpdateDocument
   }
   
@@ -30,6 +36,8 @@ struct GPTConsole: View {
           GPTConsoleCell(
             message: .init(id: offset, message: message), 
             isEditing: offset == editingCellIndex,
+            isSyntaxHighlightingEnabled: $isSyntaxHighlightingEnabled,
+            isStreamingText: $isStreamingText,
             didStopEditing: { updatedText in
               didUpdateDocument((offset, updatedText))
               editingCellIndex = nil

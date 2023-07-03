@@ -91,8 +91,8 @@
 			isa = PBXGroup;
 			children = (
 				EAF94D302A31A9C100A1B98A /* Utils */,
-				EAF94D2B2A31A98100A1B98A /* Views */,
 				EAF94D282A31A92000A1B98A /* Storage */,
+				EAF94D2B2A31A98100A1B98A /* Views */,
 				EAF94D142A31A87100A1B98A /* ChatGPTApp.swift */,
 				EAF94D182A31A87200A1B98A /* Assets.xcassets */,
 				EAF94D1D2A31A87200A1B98A /* ChatGPT.entitlements */,
@@ -383,7 +383,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tss.chatgpt.ChatGPT;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -415,7 +415,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tss.chatgpt.ChatGPT;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";

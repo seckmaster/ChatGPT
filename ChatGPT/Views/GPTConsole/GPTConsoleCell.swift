@@ -21,10 +21,16 @@ struct GPTConsoleCell: View {
   init(
     message: Message, 
     isEditing: Bool,
+    isSyntaxHighlightingEnabled: Binding<Bool>,
+    isStreamingText: Binding<Bool>,
     didStopEditing: @escaping (String) -> Void,
     requestStartEdit: @escaping () -> Void
   ) {
-    self.viewModel = .init(message: message)
+    self.viewModel = .init(
+      message: message,
+      isSyntaxHighlightingEnabled: isSyntaxHighlightingEnabled,
+      isStreamingText: isStreamingText
+    )
     self.isEditing = isEditing
     self.didStopEditing = didStopEditing
     self.requestStartEdit = requestStartEdit
@@ -40,12 +46,14 @@ struct GPTConsoleCell: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
         .opacity(isEditing ? 0 : 1)
-        HStack {
+        VStack(alignment: .leading, spacing: 17) {
+          Text(viewModel.header)
           TextView<ViewModel>(text: $viewModel.text, delegate: delegate)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .padding()
         .opacity(isEditing ? 1 : 0)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
       }
       .padding()
       .background(background)
@@ -114,18 +122,27 @@ extension GPTConsoleCell {
     @Published var selectedRanges: [NSRange] = []
     @Published var viewingText: AttributedString
     @Published var text: AttributedString
+    @Published var header: AttributedString
+    @Binding var isSyntaxHighlightingEnabled: Bool
+    @Binding var isStreamingText: Bool
     
-    init(message: Message) {
+    init(
+      message: Message,
+      isSyntaxHighlightingEnabled: Binding<Bool>,
+      isStreamingText: Binding<Bool>
+    ) {
       self.message = message
+      self.header = headerFromMessage(message.message)
+      self._isSyntaxHighlightingEnabled = isSyntaxHighlightingEnabled
+      self._isStreamingText = isStreamingText
       var container = AttributeContainer()
       container.foregroundColor = .white
       container.font = .systemFont(ofSize: 14)
       self.text = AttributedString(message.message.content!, attributes: container)
-      self.viewingText = .init()
-//      Task { @MainActor in
-//        self.viewingText = await messageToAttributedString(message.message)
-//      }
       self.viewingText = messageToAttributedString(message.message)
+      Task {
+        await self.updateViewingText()
+      }
     }
     
     func updateDocument() {
@@ -137,11 +154,66 @@ extension GPTConsoleCell {
         role: message.message.role,
         content: .init(text.characters[...])
       )
-//      Task {
-//        viewingText = await messageToAttributedString(message.message)
-//      }
-
+      updateViewingText()
+    }
+    
+    @MainActor
+    func updateViewingText() {
       self.viewingText = messageToAttributedString(message.message)
+      guard isSyntaxHighlightingEnabled, !isStreamingText else { return }
+      
+      Task { @MainActor in
+        var highlightedBlocks = [HighlightedCodeBlock]()
+        for block in parseCodeBlocks(from: self.message.message.content ?? "") {
+          let highlightedBlock = try await highlightCodeBlock(
+            string: self.message.message.content ?? "", 
+            block: block
+          )
+          highlightedBlocks.append(highlightedBlock)
+        }
+        
+        var lowerBound = self.message.message.content!.startIndex
+        var container = AttributeContainer()
+        var string = messageToAttributedString(
+          .init(role: self.message.message.role, content: nil)
+        )
+        
+        for block in highlightedBlocks {
+          do {
+            let attributedString = try NSMutableAttributedString(
+              data: block.html.data(using: .utf8)!, 
+              options: [
+                .documentType: NSAttributedString.DocumentType.html, 
+                  .characterEncoding: String.Encoding.utf8.rawValue
+              ],
+              documentAttributes: nil
+            )
+            
+            let match = block.block.range
+            let beforeRange = lowerBound..<match.lowerBound
+            container = AttributeContainer()
+            container.foregroundColor = .white
+            container.font = .systemFont(ofSize: 14)
+            var substr = AttributedString(self.message.message.content![beforeRange])
+            substr.setAttributes(container)
+            string.append(substr)
+            string.append(AttributedString(attributedString))
+            lowerBound = match.upperBound
+          } catch {
+            continue
+          }
+        }
+        if lowerBound < self.message.message.content!.endIndex {
+          container = AttributeContainer()
+          container.foregroundColor = .white
+          container.font = .systemFont(ofSize: 14)
+          var substr = AttributedString(self.message.message.content![lowerBound..<self.message.message.content!.endIndex])
+          substr.setAttributes(container)
+          string.append(substr)
+        }
+        
+        self.viewingText = string
+      }
     }
   }
 }

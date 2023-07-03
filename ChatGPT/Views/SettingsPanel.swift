@@ -67,10 +67,18 @@ struct SettingsPanel: View {
           }
         }
         container {
-          HStack {
-            Toggle(isOn: $stream) { Text("Stream:") }
-              .toggleStyle(.switch)
-            Spacer()
+          VStack(alignment: .leading) {
+            HStack {
+              Toggle(isOn: $enableSyntaxHighlight) { Text("Syntax highlighting:") }
+                .toggleStyle(.switch)
+              Text("Currently in beta mode.")
+                .font(.body.italic())
+              Spacer()
+            }
+            if enableSyntaxHighlight {
+              Text("Requires [Pygmentize](https://formulae.brew.sh/formula/pygments).")
+                .font(.body.italic())
+            }
           }
         }
         Spacer()
@@ -101,6 +109,7 @@ struct SettingsPanel: View {
   private func container(@ViewBuilder label: () -> some View) -> some View {
     VStack {
       label()
+        .frame(maxWidth: .infinity)
     }
     .padding()
     .background(Color.palette.background1)

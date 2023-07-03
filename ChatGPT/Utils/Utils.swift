@@ -11,7 +11,7 @@ import RegexBuilder
 
 let isSyntaxHighlightingEnabled = true
 let lock = NSLock()
-var syntaxHighlightingCache = [String: String]()
+var syntaxHighlightingCache = [Substring: String]()
 var cachedPygmentsExecutableURL: URL?
 
 extension NSFont {
@@ -64,139 +64,6 @@ extension NSFont {
   }
 }
 
-func chatToAttributedStringAsync(
-  _ chat: [ChatOpenAILLM.Message]
-) async -> AttributedString {
-  var string = AttributedString()
-  for message in chat {
-    switch message.role {
-    case .system:
-      var container = AttributeContainer()
-      container.foregroundColor = .red
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  System\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      
-      container = AttributeContainer()
-      container.foregroundColor = .white
-      container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content!)
-      substr.setAttributes(container)
-      string.append(substr)
-    case .assistant:
-      let regex = Regex {
-        ChoiceOf {
-          "```"
-          "'''"
-        }
-        Capture {
-          OneOrMore(.word)
-          Anchor.endOfLine
-        }
-        Capture {
-          OneOrMore(.any.subtracting(.anyOf(["'" as Character, "`"])))
-        }
-        ChoiceOf {
-          "```"
-          "'''"
-        }
-      }
-      
-      var container = AttributeContainer()
-      container.foregroundColor = .orange
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  Assistant\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      
-      if !isSyntaxHighlightingEnabled {
-        container = AttributeContainer()
-        container.foregroundColor = .white
-        container.font = .systemFont(ofSize: 14)
-        substr = AttributedString(message.content!)
-        substr.setAttributes(container)
-        string.append(substr)
-      } else {
-        var lowerBound = message.content!.startIndex
-        
-        for match in message.content!.matches(of: regex) {
-          do {
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-              .appending(path: "chat-gpt-tmp-code.\(match.1)")
-            let html = try await codeToHtml(code: String(match.output.2), url: url)
-            let attributedString = try NSMutableAttributedString(
-              data: html.data(using: .utf8)!, 
-              options: [
-                .documentType: NSAttributedString.DocumentType.html, 
-                  .characterEncoding: String.Encoding.utf8.rawValue
-              ],
-              documentAttributes: nil
-            )
-            
-            let beforeRange = lowerBound..<match.range.lowerBound
-            container = AttributeContainer()
-            container.foregroundColor = .white
-            container.font = .systemFont(ofSize: 14)
-            substr = AttributedString(message.content![beforeRange])
-            substr.setAttributes(container)
-            string.append(substr)
-            string.append(AttributedString(attributedString))
-            lowerBound = match.range.upperBound
-          } catch {
-            continue
-          }
-        }
-        if lowerBound < message.content!.endIndex {
-          container = AttributeContainer()
-          container.foregroundColor = .white
-          container.font = .systemFont(ofSize: 14)
-          substr = AttributedString(message.content![lowerBound..<message.content!.endIndex])
-          substr.setAttributes(container)
-          string.append(substr)
-        }
-      }
-    case .user:
-      var container = AttributeContainer()
-      container.foregroundColor = .magenta
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  User\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      
-      container = AttributeContainer()
-      container.foregroundColor = .white
-      container.font = .systemFont(ofSize: 14)
-      substr = AttributedString(message.content!)
-      substr.setAttributes(container)
-      string.append(substr)
-    case .custom("error"), .custom("Error"):
-      var container = AttributeContainer()
-      container.foregroundColor = .orange
-      container.font = .boldSystemFont(ofSize: 14)
-      var substr = AttributedString("⦿  Error\n\n")
-      substr.setAttributes(container)
-      string.append(substr)
-      
-      container = AttributeContainer()
-      container.foregroundColor = .red
-      container.font = .systemFont(ofSize: 12)
-      substr = AttributedString(message.content!)
-      substr.setAttributes(container)
-      string.append(substr)
-    case _:
-      fatalError()
-    }
-  }
-  return string
-}
-
-func messageToAttributedStringAsync(
-  _ message: ChatOpenAILLM.Message
-) async -> AttributedString {
-  await chatToAttributedStringAsync([message])
-}
-
 func messageToAttributedString(
   _ message: ChatOpenAILLM.Message
 ) -> AttributedString {
@@ -207,14 +74,19 @@ func messageToAttributedString(
     prefix: String = "⦿  "
   ) -> AttributedString {
     var string = AttributedString()
-    
     var container = AttributeContainer()
     container.foregroundColor = color
     container.font = .boldSystemFont(ofSize: 14)
     var substr = AttributedString(prefix + header + "\n\n")
     substr.setAttributes(container)
     string.append(substr)
-    string.append(parseMarkdown(message.content ?? ""))
+    container = AttributeContainer()
+    container.font = .systemFont(ofSize: 14)
+    container.foregroundColor = .white
+    var content = AttributedString(message.content ?? "")
+    content.setAttributes(container)
+//    string.append(parseMarkdown(message.content ?? ""))
+    string.append(content)
     return string
   }
   
@@ -248,11 +120,53 @@ func messageToAttributedString(
   }
 }
 
+func headerFromMessage(
+  _ message: ChatOpenAILLM.Message
+) -> AttributedString {
+  func format(
+    color: Color,
+    header: String,
+    prefix: String = "⦿  "
+  ) -> AttributedString {
+    var container = AttributeContainer()
+    container.foregroundColor = color
+    container.font = .boldSystemFont(ofSize: 14)
+    var headerStr = AttributedString(prefix + header)
+    headerStr.setAttributes(container)
+    return headerStr
+  }
+  
+  switch message.role {
+  case .system:
+    return format(
+      color: .red, 
+      header: "System"
+    )
+  case .assistant:
+    return format(
+      color: .purple, 
+      header: "Assistant"
+    )
+  case .user:
+    return format(
+      color: .cyan, 
+      header: "User"
+    )
+  case .custom("error"), .custom("Error"):
+    return format(
+      color: .orange, 
+      header: "Error"
+    )
+  case _:
+    fatalError()
+  }
+}
+
 func parseMarkdown(
   _ markdown: String,
-  allowsExtendedAttributes: Bool = false,
+  allowsExtendedAttributes: Bool = true,
   interpretedSyntax: AttributedString.MarkdownParsingOptions.InterpretedSyntax = .inlineOnlyPreservingWhitespace,
-  failurePolicy: AttributedString.MarkdownParsingOptions.FailurePolicy = .returnPartiallyParsedIfPossible,
+  failurePolicy: AttributedString.MarkdownParsingOptions.FailurePolicy = .throwError,
   primaryForegroundColor: Color? = nil
 ) -> AttributedString {
   do {
@@ -313,7 +227,94 @@ func parseMarkdown(
   }
 }
 
-func codeToHtml(code: String, url: URL) async throws -> String {
+struct CodeBlock {
+  var lang: Substring
+  var range: Range<String.Index>
+}
+
+func parseCodeBlocks(
+  from string: String
+) -> [CodeBlock] {
+  let regex = Regex {
+    ChoiceOf {
+      "```"
+      "'''"
+    }
+    Capture {
+      OneOrMore(.word)
+      Anchor.endOfLine
+    }
+    Capture {
+      OneOrMore(.any.subtracting(.anyOf(["'" as Character, "`"])))
+    }
+    ChoiceOf {
+      "```"
+      "'''"
+    }
+  }
+  
+  return string
+    .matches(of: regex)
+    .map { .init(lang: $0.output.1, range: $0.range) }
+
+//    var lowerBound = message.content!.startIndex
+//    
+//    for match in message.content!.matches(of: regex) {
+//      do {
+//        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+//          .appending(path: "chat-gpt-tmp-code.\(match.1)")
+//        let html = try await codeToHtml(code: String(match.output.2), url: url)
+//        let attributedString = try NSMutableAttributedString(
+//          data: html.data(using: .utf8)!, 
+//          options: [
+//            .documentType: NSAttributedString.DocumentType.html, 
+//              .characterEncoding: String.Encoding.utf8.rawValue
+//          ],
+//          documentAttributes: nil
+//        )
+//        
+//        let beforeRange = lowerBound..<match.range.lowerBound
+//        container = AttributeContainer()
+//        container.foregroundColor = .white
+//        container.font = .systemFont(ofSize: 14)
+//        substr = AttributedString(message.content![beforeRange])
+//        substr.setAttributes(container)
+//        string.append(substr)
+//        string.append(AttributedString(attributedString))
+//        lowerBound = match.range.upperBound
+//      } catch {
+//        continue
+//      }
+//    }
+//    if lowerBound < message.content!.endIndex {
+//      container = AttributeContainer()
+//      container.foregroundColor = .white
+//      container.font = .systemFont(ofSize: 14)
+//      substr = AttributedString(message.content![lowerBound..<message.content!.endIndex])
+//      substr.setAttributes(container)
+//      string.append(substr)
+//    }
+}
+
+struct HighlightedCodeBlock {
+  var block: CodeBlock
+  var html: String
+}
+
+func highlightCodeBlock(
+  string: String,
+  block: CodeBlock
+) async throws -> HighlightedCodeBlock {
+  let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    .appending(path: "chat-gpt-tmp-code.\(block.lang)")
+  let html = try await codeToHtml(
+    code: string[block.range],
+    url: url
+  )
+  return .init(block: block, html: html)
+}
+
+func codeToHtml(code: Substring, url: URL) async throws -> String {
   func fetchPygmentsExecutableURL() async throws -> URL {
 //    if let url = lock.withLock({ cachedPygmentsExecutableURL }) { return url }
 //    let path = try await executeCommand(
