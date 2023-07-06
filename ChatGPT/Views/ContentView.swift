@@ -160,9 +160,14 @@ struct ContentView: View {
         Spacer()
         VStack {
           Spacer()
-          LoadingButton(isLoading: $isLoading) { 
-            Task {
-              await callGPT()
+          LoadingButton(isLoading: $isLoading) { isLoading in
+            if isLoading {
+              viewModel.activeTask?.cancel()
+            } else {
+              let task = Task {
+                await callGPT()
+              }
+              viewModel.activeTask = task
             }
           } label: { 
             Image(systemName: "paperplane.fill")
@@ -183,9 +188,10 @@ struct ContentView: View {
       let kKeyKode: UInt16 = 40     // 'k'
       switch (event.keyCode, event.modifierFlags.contains(.command)) {
       case (enterKeyCode, true):
-        Task {
+        let task = Task {
           await callGPT()
         }
+        viewModel.activeTask = task
       case (kKeyKode, true):
         editingText = ""
       case _:
@@ -227,7 +233,19 @@ struct ContentView: View {
         )
         documentsViewModel.updateActiveHistory()
 
-        for try await chunk in try viewModel.streamCallGPT(history: documentsViewModel.activeDocumentHistory) {
+      loop: for try await chunk in try viewModel.streamCallGPT(history: documentsViewModel.activeDocumentHistory) {
+          do { // @CHECK: - This do block might be supefluous
+            if let task = viewModel.activeTask, task.isCancelled {
+              viewModel.activeTask = nil
+              isLoading = false
+              break loop
+            }
+            try Task.checkCancellation()
+          } catch {
+            viewModel.activeTask = nil
+            isLoading = false
+            break loop
+          }
           let messages = chunk as! [ChatOpenAILLM.Message]
           for message in messages {
             let index = documentsViewModel.documentIndex(documentID: documentID)
@@ -276,6 +294,7 @@ extension ContentView {
     @Published var model: SettingsPanel.Model = .gpt4
     @Published var stream: Bool = true
     @Published var enableSyntaxHighlighting: Bool = true
+    var activeTask: Task<(), Never>?
     
     var apiKey: String? {
       didSet {

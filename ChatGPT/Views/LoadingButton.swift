@@ -10,12 +10,12 @@ import SwiftUI
 
 struct LoadingButton<T: View>: View {
   @Binding var isLoading: Bool
-  let action: () -> Void
+  let action: (Bool) -> Void
   let label: () -> T
   
   var body: some View {
     Button {
-      action()
+      action(isLoading)
     } label: {
       if isLoading {
         ProgressView()
@@ -26,6 +26,5 @@ struct LoadingButton<T: View>: View {
         label()
       }
     }
-    .disabled(isLoading)
   }
 }
