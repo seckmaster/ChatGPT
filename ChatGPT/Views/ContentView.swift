@@ -47,6 +47,8 @@ struct ContentView: View {
                     } else {
                       documentsViewModel.storeActiveDocument(reload: true)
                     }
+                  } else {
+                    documentsViewModel.storeActiveDocument(reload: true)
                   }
                 }
               )
