@@ -222,7 +222,7 @@ extension DocumentsView {
       _ message: ChatOpenAILLM.Message,
       documentID: Document.ID
     ) {
-      let index = documentIndex(documentID: documentID)
+      guard let index = documentIndex(documentID: documentID) else { return }
       documents[index].history.append(message)
       documents[index].lastModifiedAt = Date()
       storeDocument(documents[index])
@@ -258,8 +258,8 @@ extension DocumentsView {
       activeDocumentHistory = activeDocument?.history ?? .default
     }
     
-    func documentIndex(documentID: Document.ID) -> Int {
-      documents.firstIndex(where: { $0.id == documentID })!
+    func documentIndex(documentID: Document.ID) -> Int? {
+      documents.firstIndex(where: { $0.id == documentID })
     }
     
     func importConversationsFromChatGPT(data: Data) throws {

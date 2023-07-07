@@ -233,30 +233,19 @@ struct ContentView: View {
         )
         documentsViewModel.updateActiveHistory()
 
-      loop: for try await chunk in try viewModel.streamCallGPT(history: documentsViewModel.activeDocumentHistory) {
-          do { // @CHECK: - This do block might be supefluous
-            if let task = viewModel.activeTask, task.isCancelled {
-              viewModel.activeTask = nil
-              isLoading = false
-              break loop
-            }
-            try Task.checkCancellation()
-          } catch {
-            viewModel.activeTask = nil
-            isLoading = false
-            break loop
-          }
+        for try await chunk in try viewModel.streamCallGPT(history: documentsViewModel.activeDocumentHistory) {
           let messages = chunk as! [ChatOpenAILLM.Message]
           for message in messages {
-            let index = documentsViewModel.documentIndex(documentID: documentID)
+            guard let index = documentsViewModel.documentIndex(documentID: documentID) else { continue }
             documentsViewModel.documents[index].history[documentsViewModel.documents[index].history.count - 1].content!.append(message.content ?? "")
             if documentID == documentsViewModel.activeDocumentId {
               documentsViewModel.updateActiveHistory()
             }
           }
         }
-        let index = documentsViewModel.documentIndex(documentID: documentID)
-        documentsViewModel.storeDocument(documentsViewModel.documents[index])
+        if let index = documentsViewModel.documentIndex(documentID: documentID) {
+          documentsViewModel.storeDocument(documentsViewModel.documents[index])
+        }
       } else {
         let response = try await viewModel.callGPT(
           history: documentsViewModel.activeDocumentHistory
