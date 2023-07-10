@@ -13,94 +13,48 @@ struct GPTConsoleCell: View {
   @ObservedObject var viewModel: ViewModel
   @State var background: Color = Color.palette.background1
   @State var isHovering = false
-  @State var delegate: TextViewDelegate<ViewModel>!
-  private var isEditing: Bool
-  var didStopEditing: (String) -> Void
-  var requestStartEdit: () -> Void
+  @State var delegate: TextViewDelegate<ViewModel>?
   
   init(
     message: Message, 
-    isEditing: Bool,
     isSyntaxHighlightingEnabled: Binding<Bool>,
     isStreamingText: Binding<Bool>,
-    didStopEditing: @escaping (String) -> Void,
-    requestStartEdit: @escaping () -> Void
+    didUpdateMessage: @escaping (String) -> Void
   ) {
     self.viewModel = .init(
       message: message,
       isSyntaxHighlightingEnabled: isSyntaxHighlightingEnabled,
-      isStreamingText: isStreamingText
+      isStreamingText: isStreamingText,
+      didUpdateMessage: didUpdateMessage
     )
-    self.isEditing = isEditing
-    self.didStopEditing = didStopEditing
-    self.requestStartEdit = requestStartEdit
+    self._delegate = .init(initialValue: .init(viewModel: viewModel))
   }
   
   var body: some View {
-    ZStack {
-      ZStack {
-        Text(viewModel.viewingText)
-          .onTapGesture {
-            beginEditing()
-          }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .opacity(isEditing ? 0 : 1)
-        VStack(alignment: .leading, spacing: 17) {
-          Text(viewModel.header)
-          TextView<ViewModel>(text: $viewModel.text, delegate: delegate)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .padding()
-        .opacity(isEditing ? 1 : 0)
-        .frame(maxWidth: .infinity)
-      }
-      .padding()
-      .background(background)
-      .onHover { over in
-        background = over ? .palette.background2 : .palette.background1
-        isHovering = over
-      }
+    VStack(alignment: .leading, spacing: 17) {
       HStack {
+        Text(viewModel.header)
         Spacer()
-        VStack {
-          if isEditing {
-            Button {
-              viewModel.updateText()
-              didStopEditing(.init(viewModel.text.characters))
-            } label: {
-              Image(systemName: "checkmark.rectangle.fill")
-                .frame(width: 40, height: 40)
-            }
-            .background(Color.palette.background)
-            .buttonStyle(.borderless)
-          } else if isHovering {
-            Button {
-              beginEditing()
-            } label: {
-              Image(systemName: "pencil")
-                .frame(width: 40, height: 40)
-            }
-            .buttonStyle(.borderless)
-            .background(Color.palette.background)
-            .onHover { over in
-              isHovering = isHovering || over
-            }
-          }
-          Spacer()
-        }
       }
-    }
-    .onChange(of: isEditing) { isEditing in
-      if !isEditing {
-        didStopEditing(.init(viewModel.text.characters))
+      .padding(.top)
+      ZStack {
+        Text(viewModel.text)
+        TextView<ViewModel>(text: $viewModel.text, delegate: delegate)
+          .frame(maxWidth: .infinity)
+          .background(background)
       }
+      .padding([.top, .bottom])
     }
-  }
-  
-  func beginEditing() {
-    delegate = .init(viewModel: viewModel)
-    requestStartEdit()
+    .frame(maxWidth: .infinity)
+    .padding()
+    .background(background)
+    .onHover { over in
+      background = over ? .palette.background2 : .palette.background1
+      isHovering = over
+    }
+    .onChange(of: viewModel.text) { newValue in
+      viewModel.performSyntaxHighlighting()
+    }
   }
 }
 
@@ -111,8 +65,6 @@ extension GPTConsoleCell {
   }
   
   class ViewModel: EditingViewModel {
-    var message: Message
-    
     @Published var isBoldHighlighted: Bool = false
     @Published var isItalicHighlighted: Bool = false
     @Published var isUnderlineHighlighted: Bool = false
@@ -120,63 +72,57 @@ extension GPTConsoleCell {
     @Published var isHeading2: Bool = false
     @Published var isHeading3: Bool = false
     @Published var selectedRanges: [NSRange] = []
-    @Published var viewingText: AttributedString
     @Published var text: AttributedString
     @Published var header: AttributedString
     @Binding var isSyntaxHighlightingEnabled: Bool
     @Binding var isStreamingText: Bool
+    let didUpdateMessage: (String) -> Void
     
     init(
       message: Message,
       isSyntaxHighlightingEnabled: Binding<Bool>,
-      isStreamingText: Binding<Bool>
+      isStreamingText: Binding<Bool>,
+      didUpdateMessage: @escaping (String) -> Void
     ) {
-      self.message = message
       self.header = headerFromMessage(message.message)
       self._isSyntaxHighlightingEnabled = isSyntaxHighlightingEnabled
       self._isStreamingText = isStreamingText
       var container = AttributeContainer()
-      container.foregroundColor = .white
+      container.foregroundColor = NSColor.white
       container.font = .systemFont(ofSize: 14)
       self.text = AttributedString(message.message.content!, attributes: container)
-      self.viewingText = messageToAttributedString(message.message)
+      self.didUpdateMessage = didUpdateMessage
       Task {
-        await self.updateViewingText()
+        await self.performSyntaxHighlighting()
       }
     }
     
-    func updateDocument() {
+    func update() {
+      didUpdateMessage(String(text.characters[...]))
     }
     
     @MainActor
-    func updateText() {
-      message.message = .init(
-        role: message.message.role,
-        content: .init(text.characters[...])
-      )
-      updateViewingText()
-    }
-    
-    @MainActor
-    func updateViewingText() {
-      self.viewingText = messageToAttributedString(message.message)
+    func performSyntaxHighlighting() {
       guard isSyntaxHighlightingEnabled, !isStreamingText else { return }
+      let content = text.characters[...]
       
       Task { @MainActor in
+        let content = String(content)
+        
         var highlightedBlocks = [HighlightedCodeBlock]()
-        for block in parseCodeBlocks(from: self.message.message.content ?? "") {
+        for block in parseCodeBlocks(from: content) {
           let highlightedBlock = try await highlightCodeBlock(
-            string: self.message.message.content ?? "", 
+            string: content,
             block: block
           )
           highlightedBlocks.append(highlightedBlock)
         }
         
-        var lowerBound = self.message.message.content!.startIndex
+        guard !highlightedBlocks.isEmpty else { return }
+        
+        var lowerBound = content.startIndex
         var container = AttributeContainer()
-        var string = messageToAttributedString(
-          .init(role: self.message.message.role, content: nil)
-        )
+        var string = AttributedString()
         
         for block in highlightedBlocks {
           do {
@@ -192,9 +138,9 @@ extension GPTConsoleCell {
             let match = block.block.range
             let beforeRange = lowerBound..<match.lowerBound
             container = AttributeContainer()
-            container.foregroundColor = .white
+            container.foregroundColor = NSColor.white
             container.font = .systemFont(ofSize: 14)
-            var substr = AttributedString(self.message.message.content![beforeRange])
+            var substr = AttributedString(content[beforeRange])
             substr.setAttributes(container)
             string.append(substr)
             string.append(AttributedString(attributedString))
@@ -203,19 +149,32 @@ extension GPTConsoleCell {
             continue
           }
         }
-        if lowerBound < self.message.message.content!.endIndex {
+        if lowerBound < content.endIndex {
           container = AttributeContainer()
-          container.foregroundColor = .white
+          container.foregroundColor = NSColor.white
           container.font = .systemFont(ofSize: 14)
-          var substr = AttributedString(self.message.message.content![lowerBound..<self.message.message.content!.endIndex])
+          var substr = AttributedString(content[lowerBound..<content.endIndex])
           substr.setAttributes(container)
           string.append(substr)
         }
         
-        self.viewingText = string
+        self.text = string
       }
     }
   }
 }
 
 extension AttributedString: @unchecked Sendable {}
+
+extension AttributedString {
+  func height(availableWidth: CGFloat) -> CGFloat {
+    NSAttributedString(self).boundingRect(
+      with: .init(
+        width: availableWidth, 
+        height: .greatestFiniteMagnitude
+      ),
+      options: [.usesLineFragmentOrigin, .usesFontLeading]
+    )
+    .height
+  }
+}

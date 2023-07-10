@@ -64,62 +64,6 @@ extension NSFont {
   }
 }
 
-func messageToAttributedString(
-  _ message: ChatOpenAILLM.Message
-) -> AttributedString {
-  func format(
-    message: ChatOpenAILLM.Message,
-    color: Color,
-    header: String,
-    prefix: String = "⦿  "
-  ) -> AttributedString {
-    var string = AttributedString()
-    var container = AttributeContainer()
-    container.foregroundColor = color
-    container.font = .boldSystemFont(ofSize: 14)
-    var substr = AttributedString(prefix + header + "\n\n")
-    substr.setAttributes(container)
-    string.append(substr)
-    container = AttributeContainer()
-    container.font = .systemFont(ofSize: 14)
-    container.foregroundColor = .white
-    var content = AttributedString(message.content ?? "")
-    content.setAttributes(container)
-//    string.append(parseMarkdown(message.content ?? ""))
-    string.append(content)
-    return string
-  }
-  
-  switch message.role {
-  case .system:
-    return format(
-      message: message,
-      color: .red, 
-      header: "System"
-    )
-  case .assistant:
-    return format(
-      message: message,
-      color: .purple, 
-      header: "Assistant"
-    )
-  case .user:
-    return format(
-      message: message,
-      color: .cyan, 
-      header: "User"
-    )
-  case .custom("error"), .custom("Error"):
-    return format(
-      message: message,
-      color: .orange, 
-      header: "Error"
-    )
-  case _:
-    fatalError()
-  }
-}
-
 func headerFromMessage(
   _ message: ChatOpenAILLM.Message
 ) -> AttributedString {

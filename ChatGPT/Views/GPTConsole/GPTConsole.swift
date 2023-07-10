@@ -35,17 +35,10 @@ struct GPTConsole: View {
         ForEach(Array(zip(history.indices, history)), id: \.0) { offset, message in
           GPTConsoleCell(
             message: .init(id: offset, message: message), 
-            isEditing: offset == editingCellIndex,
             isSyntaxHighlightingEnabled: $isSyntaxHighlightingEnabled,
             isStreamingText: $isStreamingText,
-            didStopEditing: { updatedText in
-              didUpdateDocument((offset, updatedText))
-              editingCellIndex = nil
-            }, 
-            requestStartEdit: {
-              editingCellIndex = offset
-              history.append(.init(role: .assistant, content: nil))
-              history.removeLast()
+            didUpdateMessage: { message in
+              didUpdateDocument((offset, message))
             }
           )
           .id(offset)
