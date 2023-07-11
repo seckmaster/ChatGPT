@@ -14,6 +14,7 @@ struct GPTConsole: View {
   @Binding var history: ChatOpenAILLM.Messages
   @Binding var isSyntaxHighlightingEnabled: Bool
   @Binding var isStreamingText: Bool
+  @State var isInitialLoad = true
   
   var didUpdateDocument: ((Int, String)?) -> Void
   
@@ -49,9 +50,12 @@ struct GPTConsole: View {
         }
       }
       .onChange(of: history) { _ in
+        guard isStreamingText || isInitialLoad else { return }
         proxy.scrollTo(history.indices.last!)
         editingCellIndex = nil
+        isInitialLoad = false
       }
+      .scrollDisabled(isStreamingText)
     }
   }
 }

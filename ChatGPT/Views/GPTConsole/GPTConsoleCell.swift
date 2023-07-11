@@ -53,7 +53,7 @@ struct GPTConsoleCell: View {
       isHovering = over
     }
     .onChange(of: viewModel.text) { newValue in
-      viewModel.performSyntaxHighlighting()
+//      viewModel.performSyntaxHighlighting()
     }
   }
 }
@@ -92,16 +92,16 @@ extension GPTConsoleCell {
       container.font = .systemFont(ofSize: 14)
       self.text = AttributedString(message.message.content!, attributes: container)
       self.didUpdateMessage = didUpdateMessage
-      Task {
-        await self.performSyntaxHighlighting()
-      }
+//      Task {
+//        self.performSyntaxHighlighting()
+//      }
     }
     
     func update() {
       didUpdateMessage(String(text.characters[...]))
+//      performSyntaxHighlighting()
     }
     
-    @MainActor
     func performSyntaxHighlighting() {
       guard isSyntaxHighlightingEnabled, !isStreamingText else { return }
       let content = text.characters[...]
@@ -165,16 +165,3 @@ extension GPTConsoleCell {
 }
 
 extension AttributedString: @unchecked Sendable {}
-
-extension AttributedString {
-  func height(availableWidth: CGFloat) -> CGFloat {
-    NSAttributedString(self).boundingRect(
-      with: .init(
-        width: availableWidth, 
-        height: .greatestFiniteMagnitude
-      ),
-      options: [.usesLineFragmentOrigin, .usesFontLeading]
-    )
-    .height
-  }
-}
